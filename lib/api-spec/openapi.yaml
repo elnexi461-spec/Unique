@@ -1,22 +1,43 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: UOU Infinite - Institutional Operating System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication and authorization
+  - name: users
+    description: User management
+  - name: students
+    description: Student operations
+  - name: lecturers
+    description: Lecturer operations
+  - name: courses
+    description: Course management
+  - name: admissions
+    description: Admission portal (The Nexus)
+  - name: enrollments
+    description: Course enrollment operations
+  - name: dashboard
+    description: Founder's War Room analytics
+  - name: verification
+    description: Proof of Skill verification gateway
+  - name: logs
+    description: System diagnostics and logs
+  - name: openai
+    description: OpenAI AI chat operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +45,824 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # Users
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Courses
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: List all courses
+      responses:
+        "200":
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+    post:
+      operationId: createCourse
+      tags: [courses]
+      summary: Create a course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCourseBody"
+      responses:
+        "201":
+          description: Created course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+  /courses/{id}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get course by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+    patch:
+      operationId: updateCourse
+      tags: [courses]
+      summary: Update course
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCourseBody"
+      responses:
+        "200":
+          description: Updated course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+    delete:
+      operationId: deleteCourse
+      tags: [courses]
+      summary: Delete course
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Students
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List all students
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: courseId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get student by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+    patch:
+      operationId: updateStudent
+      tags: [students]
+      summary: Update student profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStudentBody"
+      responses:
+        "200":
+          description: Updated student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+
+  /students/{id}/credential:
+    get:
+      operationId: getStudentCredential
+      tags: [students]
+      summary: Get student QR credential data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Credential data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentCredential"
+
+  /students/at-risk:
+    get:
+      operationId: getAtRiskStudents
+      tags: [students]
+      summary: Get students at risk of dropping out
+      responses:
+        "200":
+          description: At-risk students with risk scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AtRiskStudent"
+
+  # Lecturers
+  /lecturers:
+    get:
+      operationId: listLecturers
+      tags: [lecturers]
+      summary: List all lecturers
+      responses:
+        "200":
+          description: List of lecturers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lecturer"
+    post:
+      operationId: createLecturer
+      tags: [lecturers]
+      summary: Create a lecturer profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLecturerBody"
+      responses:
+        "201":
+          description: Created lecturer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+
+  /lecturers/{id}:
+    get:
+      operationId: getLecturer
+      tags: [lecturers]
+      summary: Get lecturer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lecturer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+    patch:
+      operationId: updateLecturer
+      tags: [lecturers]
+      summary: Update lecturer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLecturerBody"
+      responses:
+        "200":
+          description: Updated lecturer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+
+  # Admissions
+  /admissions:
+    get:
+      operationId: listAdmissions
+      tags: [admissions]
+      summary: List all admission applications
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Admission"
+    post:
+      operationId: createAdmission
+      tags: [admissions]
+      summary: Submit an admission application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdmissionBody"
+      responses:
+        "201":
+          description: Created application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+
+  /admissions/{id}:
+    get:
+      operationId: getAdmission
+      tags: [admissions]
+      summary: Get admission application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Admission application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+    patch:
+      operationId: updateAdmission
+      tags: [admissions]
+      summary: Update admission status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdmissionBody"
+      responses:
+        "200":
+          description: Updated admission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+
+  /admissions/{id}/analyze:
+    post:
+      operationId: analyzeAdmission
+      tags: [admissions]
+      summary: AI-analyze uploaded results for course match percentage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeAdmissionBody"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdmissionAnalysis"
+
+  /admissions/stats:
+    get:
+      operationId: getAdmissionStats
+      tags: [admissions]
+      summary: Get admission statistics
+      responses:
+        "200":
+          description: Admission stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdmissionStats"
+
+  # Enrollments
+  /enrollments:
+    get:
+      operationId: listEnrollments
+      tags: [enrollments]
+      summary: List enrollments
+      parameters:
+        - name: studentId
+          in: query
+          schema:
+            type: integer
+        - name: courseId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of enrollments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrollment"
+    post:
+      operationId: createEnrollment
+      tags: [enrollments]
+      summary: Enroll student in a course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEnrollmentBody"
+      responses:
+        "201":
+          description: Created enrollment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enrollment"
+
+  /enrollments/{id}:
+    delete:
+      operationId: deleteEnrollment
+      tags: [enrollments]
+      summary: Remove enrollment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Dashboard / Founder War Room
+  /dashboard/overview:
+    get:
+      operationId: getDashboardOverview
+      tags: [dashboard]
+      summary: High-level institutional metrics
+      responses:
+        "200":
+          description: Overview metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardOverview"
+
+  /dashboard/engagement:
+    get:
+      operationId: getDashboardEngagement
+      tags: [dashboard]
+      summary: Student engagement timeseries data
+      responses:
+        "200":
+          description: Engagement data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EngagementDataPoint"
+
+  /dashboard/geographic:
+    get:
+      operationId: getDashboardGeographic
+      tags: [dashboard]
+      summary: Geographic distribution of students
+      responses:
+        "200":
+          description: Geographic data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeographicDataPoint"
+
+  /dashboard/course-distribution:
+    get:
+      operationId: getDashboardCourseDistribution
+      tags: [dashboard]
+      summary: Student distribution across courses
+      responses:
+        "200":
+          description: Course distribution
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CourseDistributionPoint"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getDashboardRecentActivity
+      tags: [dashboard]
+      summary: Recent platform activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  # Verification Gateway
+  /verify/{token}:
+    get:
+      operationId: verifyCredential
+      tags: [verification]
+      summary: Public credential verification endpoint
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+        "404":
+          description: Credential not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # Admin Health & Diagnostics
+  /admin/health:
+    get:
+      operationId: getSystemHealth
+      tags: [logs]
+      summary: System health with AI-powered log diagnostics
+      responses:
+        "200":
+          description: System health report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemHealth"
+
+  /admin/logs:
+    get:
+      operationId: getSystemLogs
+      tags: [logs]
+      summary: Recent system logs
+      parameters:
+        - name: level
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: System logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEntry"
+
+  # OpenAI Chatbot (UOU Sentinel)
+  /openai/conversations:
+    get:
+      operationId: listOpenaiConversations
+      tags: [openai]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+    post:
+      operationId: createOpenaiConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpenaiConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversation"
+
+  /openai/conversations/{id}:
+    get:
+      operationId: getOpenaiConversation
+      tags: [openai]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversationWithMessages"
+    delete:
+      operationId: deleteOpenaiConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /openai/conversations/{id}/messages:
+    post:
+      operationId: sendOpenaiMessage
+      tags: [openai]
+      summary: Send a message and receive a streaming response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiMessageBody"
+      responses:
+        "200":
+          description: SSE stream of assistant text chunks
+          content:
+            text/event-stream: {}
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +873,753 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    # Auth
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    RegisterBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+      required:
+        - name
+        - email
+        - password
+        - role
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - token
+        - user
+
+    # User
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - role
+        - createdAt
+
+    UpdateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        avatarUrl:
+          type: string
+
+    # Course
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        code:
+          type: string
+        department:
+          type: string
+        description:
+          type: ["string", "null"]
+        credits:
+          type: integer
+        capacity:
+          type: integer
+        lecturerId:
+          type: ["integer", "null"]
+        requiredSubjects:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - code
+        - department
+        - credits
+        - capacity
+        - requiredSubjects
+        - createdAt
+
+    CreateCourseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        code:
+          type: string
+        department:
+          type: string
+        description:
+          type: string
+        credits:
+          type: integer
+        capacity:
+          type: integer
+        lecturerId:
+          type: integer
+        requiredSubjects:
+          type: string
+      required:
+        - title
+        - code
+        - department
+        - credits
+        - capacity
+        - requiredSubjects
+
+    UpdateCourseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        capacity:
+          type: integer
+        lecturerId:
+          type: integer
+
+    # Student
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        studentId:
+          type: string
+        department:
+          type: string
+        level:
+          type: string
+        status:
+          type: string
+        gpa:
+          type: ["number", "null"]
+        lastLoginAt:
+          type: ["string", "null"]
+          format: date-time
+        loginCount:
+          type: integer
+        credentialToken:
+          type: string
+        skills:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - name
+        - email
+        - studentId
+        - department
+        - level
+        - status
+        - loginCount
+        - credentialToken
+        - skills
+        - createdAt
+
+    UpdateStudentBody:
+      type: object
+      properties:
+        department:
+          type: string
+        level:
+          type: string
+        status:
+          type: string
+        skills:
+          type: string
+
+    StudentCredential:
+      type: object
+      properties:
+        studentId:
+          type: string
+        name:
+          type: string
+        department:
+          type: string
+        skills:
+          type: string
+        credentialToken:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        qrData:
+          type: string
+      required:
+        - studentId
+        - name
+        - department
+        - skills
+        - credentialToken
+        - issuedAt
+        - qrData
+
+    AtRiskStudent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        studentId:
+          type: string
+        department:
+          type: string
+        riskScore:
+          type: number
+        riskReason:
+          type: string
+        lastLoginAt:
+          type: ["string", "null"]
+          format: date-time
+        loginCount:
+          type: integer
+      required:
+        - id
+        - name
+        - studentId
+        - department
+        - riskScore
+        - riskReason
+        - loginCount
+
+    # Lecturer
+    Lecturer:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        department:
+          type: string
+        specialization:
+          type: string
+        courseCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - name
+        - email
+        - department
+        - specialization
+        - courseCount
+        - createdAt
+
+    CreateLecturerBody:
+      type: object
+      properties:
+        userId:
+          type: integer
+        department:
+          type: string
+        specialization:
+          type: string
+      required:
+        - userId
+        - department
+        - specialization
+
+    UpdateLecturerBody:
+      type: object
+      properties:
+        department:
+          type: string
+        specialization:
+          type: string
+
+    # Admissions
+    Admission:
+      type: object
+      properties:
+        id:
+          type: integer
+        applicantName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        courseId:
+          type: integer
+        courseTitle:
+          type: string
+        status:
+          type: string
+        matchPercentage:
+          type: ["number", "null"]
+        waecResults:
+          type: ["string", "null"]
+        jambScore:
+          type: ["integer", "null"]
+        analysisResult:
+          type: ["string", "null"]
+        submittedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - applicantName
+        - email
+        - phone
+        - courseId
+        - courseTitle
+        - status
+        - submittedAt
+
+    CreateAdmissionBody:
+      type: object
+      properties:
+        applicantName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        courseId:
+          type: integer
+        waecResults:
+          type: string
+        jambScore:
+          type: integer
+      required:
+        - applicantName
+        - email
+        - phone
+        - courseId
+
+    UpdateAdmissionBody:
+      type: object
+      properties:
+        status:
+          type: string
+        matchPercentage:
+          type: number
+        analysisResult:
+          type: string
+
+    AnalyzeAdmissionBody:
+      type: object
+      properties:
+        waecResults:
+          type: string
+        jambScore:
+          type: integer
+      required:
+        - waecResults
+
+    AdmissionAnalysis:
+      type: object
+      properties:
+        matchPercentage:
+          type: number
+        subjectBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubjectScore"
+        recommendation:
+          type: string
+        eligibility:
+          type: string
+      required:
+        - matchPercentage
+        - subjectBreakdown
+        - recommendation
+        - eligibility
+
+    SubjectScore:
+      type: object
+      properties:
+        subject:
+          type: string
+        grade:
+          type: string
+        weight:
+          type: number
+        score:
+          type: number
+      required:
+        - subject
+        - grade
+        - weight
+        - score
+
+    AdmissionStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        pending:
+          type: integer
+        approved:
+          type: integer
+        rejected:
+          type: integer
+        averageMatchPercentage:
+          type: number
+      required:
+        - total
+        - pending
+        - approved
+        - rejected
+        - averageMatchPercentage
+
+    # Enrollment
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        courseId:
+          type: integer
+        courseName:
+          type: string
+        studentName:
+          type: string
+        grade:
+          type: ["string", "null"]
+        enrolledAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - studentId
+        - courseId
+        - courseName
+        - studentName
+        - enrolledAt
+
+    CreateEnrollmentBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        courseId:
+          type: integer
+      required:
+        - studentId
+        - courseId
+
+    # Dashboard
+    DashboardOverview:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        totalLecturers:
+          type: integer
+        totalCourses:
+          type: integer
+        totalEnrollments:
+          type: integer
+        pendingAdmissions:
+          type: integer
+        activeStudentsToday:
+          type: integer
+        retentionRiskCount:
+          type: integer
+        averageGpa:
+          type: number
+      required:
+        - totalStudents
+        - totalLecturers
+        - totalCourses
+        - totalEnrollments
+        - pendingAdmissions
+        - activeStudentsToday
+        - retentionRiskCount
+        - averageGpa
+
+    EngagementDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        activeUsers:
+          type: integer
+        newEnrollments:
+          type: integer
+        submissionsCount:
+          type: integer
+      required:
+        - date
+        - activeUsers
+        - newEnrollments
+        - submissionsCount
+
+    GeographicDataPoint:
+      type: object
+      properties:
+        state:
+          type: string
+        studentCount:
+          type: integer
+        latitude:
+          type: number
+        longitude:
+          type: number
+      required:
+        - state
+        - studentCount
+        - latitude
+        - longitude
+
+    CourseDistributionPoint:
+      type: object
+      properties:
+        courseTitle:
+          type: string
+        department:
+          type: string
+        enrollmentCount:
+          type: integer
+        capacity:
+          type: integer
+      required:
+        - courseTitle
+        - department
+        - enrollmentCount
+        - capacity
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        message:
+          type: string
+        actorName:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - message
+        - actorName
+        - timestamp
+
+    # Verification
+    VerificationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        studentName:
+          type: string
+        studentId:
+          type: string
+        department:
+          type: string
+        skills:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        verifiedAt:
+          type: string
+          format: date-time
+        blockchainHash:
+          type: string
+      required:
+        - valid
+        - verifiedAt
+
+    # System Health
+    SystemHealth:
+      type: object
+      properties:
+        status:
+          type: string
+        uptime:
+          type: number
+        memoryUsage:
+          type: number
+        errorCount:
+          type: integer
+        warningCount:
+          type: integer
+        aiDiagnosis:
+          type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+        lastChecked:
+          type: string
+          format: date-time
+      required:
+        - status
+        - uptime
+        - memoryUsage
+        - errorCount
+        - warningCount
+        - aiDiagnosis
+        - suggestions
+        - lastChecked
+
+    LogEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        level:
+          type: string
+        message:
+          type: string
+        context:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - level
+        - message
+        - createdAt
+
+    # OpenAI
+    OpenaiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+
+    OpenaiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    CreateOpenaiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+
+    SendOpenaiMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    OpenaiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages

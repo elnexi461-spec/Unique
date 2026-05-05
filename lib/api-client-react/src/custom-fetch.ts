@@ -356,6 +356,12 @@ export async function customFetch<T = unknown>(
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
+  } else {
+    // Add logic from auth instruction: read local storage directly here
+    const token = localStorage.getItem('uou_token');
+    if (token && !headers.has("authorization")) {
+      headers.set('authorization', `Bearer ${token}`);
+    }
   }
 
   const requestInfo = { method, url: resolveUrl(input) };
