@@ -8,6 +8,8 @@ import { AppLayout } from "@/components/layout";
 import { CommandMenu } from "@/components/command-menu";
 import { SentinelChat } from "@/components/sentinel-chat";
 import { AnnouncementTicker } from "@/components/AnnouncementTicker";
+import { SentinelPulse } from "@/components/SentinelPulse";
+import { useState } from "react";
 
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
@@ -45,10 +47,8 @@ function Router() {
         <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} />
 
-        {/* Founder */}
         <Route path="/founder" component={FounderPage} />
 
-        {/* Coordinator */}
         <Route path="/coordinator" component={CoordinatorHub} />
         <Route path="/coordinator/students" component={StudentsList} />
         <Route path="/coordinator/lecturers" component={LecturersList} />
@@ -56,11 +56,9 @@ function Router() {
         <Route path="/coordinator/admissions" component={AdmissionsPage} />
         <Route path="/coordinator/timetable" component={CoordinatorTimetable} />
 
-        {/* Lecturer */}
         <Route path="/lecturer" component={LecturerPortal} />
         <Route path="/lecturer/grades" component={LecturerGrades} />
 
-        {/* Student */}
         <Route path="/student" component={StudentPortal} />
         <Route path="/student/courses" component={StudentCourses} />
         <Route path="/student/credential" component={StudentCredential} />
@@ -68,7 +66,6 @@ function Router() {
         <Route path="/student/timetable" component={StudentTimetable} />
         <Route path="/student/lecture/:courseId" component={StudentLecture} />
 
-        {/* System */}
         <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/admin/health" component={SystemHealth} />
 
@@ -79,6 +76,8 @@ function Router() {
 }
 
 function App() {
+  const [sentinelActive, setSentinelActive] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -88,7 +87,8 @@ function App() {
               <AnnouncementTicker />
               <Router />
               <CommandMenu />
-              <SentinelChat />
+              <SentinelChat onActiveChange={setSentinelActive} />
+              <SentinelPulse active={sentinelActive} label="UOU Sentinel Processing" />
             </AuthProvider>
           </ErrorBoundary>
         </WouterRouter>

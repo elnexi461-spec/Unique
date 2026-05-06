@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, logEntriesTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { openaiAvailable, requireOpenAI } from "@workspace/integrations-openai-ai-server";
 import { desc, lte } from "drizzle-orm";
 import os from "os";
 
@@ -23,7 +23,7 @@ router.get("/admin/health", requireAuth, async (req, res): Promise<void> => {
   if (errorLogs.length > 0) {
     try {
       const logSummary = errorLogs.slice(0, 10).map((l) => `[${l.level.toUpperCase()}] ${l.message}`).join("\n");
-      const completion = await openai.chat.completions.create({
+      const completion = await requireOpenAI().chat.completions.create({
         model: "gpt-5.4",
         max_completion_tokens: 512,
         messages: [

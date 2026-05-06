@@ -3,7 +3,7 @@ import { db, admissionsTable, coursesTable } from "@workspace/db";
 import { eq, avg, count, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { CreateAdmissionBody, UpdateAdmissionBody, AnalyzeAdmissionBody } from "@workspace/api-zod";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { requireOpenAI, openaiAvailable } from "@workspace/integrations-openai-ai-server";
 
 const router: IRouter = Router();
 
@@ -111,7 +111,7 @@ Base matchPercentage on: subject grades weighted by importance, JAMB score (mini
 Return ONLY the JSON object, no extra text.`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await requireOpenAI().chat.completions.create({
       model: "gpt-5.4",
       max_completion_tokens: 1024,
       messages: [{ role: "user", content: prompt }],

@@ -1,75 +1,82 @@
-# UOU Infinite — Institutional Operating System for Unique Open University
+# UOU Infinite — Unique Open University Institutional OS
+
+A next-generation digital university platform with cinematic onboarding, AI-gated learning, and credential issuance.
 
 ## Run & Operate
 
-- `pnpm run typecheck` — full typecheck across all packages (builds libs first)
-- `pnpm run typecheck:libs` — build composite libs (db, api-zod, api-client-react, integrations)
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Workflows: API Server (port 8080 → /api), Frontend (port auto → /), Mockup Sandbox (/\_\_mockup)
+```
+# Start everything (frontend + API server)
+PORT=8080 pnpm --filter @workspace/api-server run dev & PORT=22169 BASE_PATH=/ pnpm --filter @workspace/uou-infinite run dev
+```
 
-**Demo credentials** (all password: `password123`):
-- Founder: `founder@uou.edu.ng`
-- Coordinator: `coordinator@uou.edu.ng`
-- Lecturer: `prof.adeleke@uou.edu.ng`
-- Student: `emeka@student.uou.edu.ng`
+Workflow: **UOU Infinite App** (managed via Replit workflow system)
+
+Required env vars:
+- `DATABASE_URL` — PostgreSQL (auto-provisioned via Replit DB)
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` + `AI_INTEGRATIONS_OPENAI_API_KEY` — optional, enables Sentinel AI Chat
+
+Push DB schema: `pnpm --filter @workspace/db run push`
 
 ## Stack
 
-- **Monorepo**: pnpm workspaces, Node.js 24, TypeScript 5.9
-- **Frontend**: React + Vite + Wouter + Framer Motion + Recharts + shadcn/ui
-- **Backend**: Express 5, PostgreSQL + Drizzle ORM, JWT auth (SESSION_SECRET)
-- **AI**: OpenAI via `@workspace/integrations-openai-ai-server`
-- **Codegen**: Orval (OpenAPI → React Query hooks + Zod schemas)
-- **Scheduler**: node-cron (midnight sentinel auto-heal)
-- **Import**: multer + papaparse (CSV/JSON/URL student import)
+- **Frontend**: React 18 + Vite 7, Tailwind CSS v4, Framer Motion, Recharts, Wouter, TanStack Query
+- **Backend**: Express 5 + Node 24, Pino logging, JWT auth
+- **DB**: Drizzle ORM + PostgreSQL (Replit managed)
+- **Build**: pnpm workspace monorepo, esbuild for API server
 
-## Where Things Live
+## Where things live
 
-- `lib/api-spec/openapi.yaml` — authoritative OpenAPI spec (source of truth)
-- `lib/db/src/schema/` — Drizzle schema (users, students, lecturers, courses, enrollments, admissions, log_entries, conversations, messages, **grades, attendance, timetable, announcements, lecture_keys**)
-- `artifacts/api-server/src/routes/` — all Express route handlers (auth, students, grades, attendance, timetable, announcements, system, import)
-- `artifacts/api-server/src/middlewares/auth.ts` — `requireAuth` / `requireRole` JWT middleware
-- `artifacts/uou-infinite/src/pages/` — all UI pages by role
-- `artifacts/uou-infinite/src/components/` — CinematicIntro, AnnouncementTicker, AntiCheatPlayer, layout, sentinel-chat, command-menu
+```
+artifacts/uou-infinite/src/
+  pages/landing.tsx          # Homepage with staggered animations
+  pages/student/            # portal, lecture, credential pages
+  components/
+    CinematicIntro.tsx       # UOU orb + portal zoom (9.5s sequence)
+    GoldCard.tsx             # 3D gold shimmer on quiz pass
+    QuizGateway.tsx          # 10-question gateway, 120s timer, Web Crypto key
+    SentinelPulse.tsx        # Bottom blue pulse bar
+    SkillGraph.tsx           # Recharts radar + circular progress
+    RemedialBridge.tsx       # Three-strike + 2hr localStorage cooldown
+    sentinel-chat.tsx        # UOU Sentinel AI assistant
+    AntiCheatPlayer.tsx      # Lecture video with anti-cheat
+artifacts/api-server/src/routes/  # Express route handlers
+lib/db/src/schema/               # Drizzle table definitions
+lib/api-spec/openapi.yaml        # OpenAPI contract (source of truth)
+```
 
-## Architecture Decisions
+## Architecture decisions
 
-- **Contract-first API**: OpenAPI spec drives all codegen; never edit generated files directly
-- **JWT in localStorage** (`uou_token`): custom-fetch reads it; `getAuthToken()` from `./lib/auth`
-- **Route prefix**: `app.use("/api", router)` — all route handlers must NOT include `/api` prefix
-- **Password hashing**: SHA256 + "uou_salt" suffix
-- **AI SSE streaming**: `/api/openai/conversations/:id/messages` streams GPT responses
-- **Anti-cheat**: HTML5 video `timeupdate` enforces max-watched position; forward-skipping snaps back
-- **Key lifecycle**: 16-char hex keys expire in 24h; midnight cron prunes expired keys
-- **SSE channels**: `/api/announcements/stream` (all users), `/api/system/live-feed` (founder/coordinator)
-- **Cinematic intro**: Framer Motion spring bounce ball → letter morph → zoom portal; sessionStorage flag `uou_intro_done` prevents replay
+- **OpenAI is optional at import time** — `lib/integrations-openai-ai-server/src/client.ts` exports `openaiAvailable` + `requireOpenAI()` so the API server starts without the integration; AI routes fail gracefully per-request
+- **Three-strike logic is client-side** — tracked in React state + `localStorage` (no DB writes needed for strike count + cooldown)
+- **Quiz key via Web Crypto API** — cryptographic key generated client-side on pass, stored as a "Golden Key" credential
+- **Cinematic intro is skippable** — auto-dismisses after ~9.5s or on user click
+- **JWT auth** — stateless tokens, roles: `student` | `lecturer` | `admin`
 
 ## Product
 
-Four role-based personas accessible after JWT login:
+- Cinematic intro with UOU logo orb physics and portal zoom
+- Role-based portals: Student (Neural Skill Graph, lecture flow) / Lecturer / Admin (Founder's War Room)
+- Assessment Gateway — 10 application-based questions, 120s countdown, pass → Gold Card ceremony
+- Three-Strike remedial bridge — 3 failures triggers AI remedial + 2hr cooldown
+- Sentinel Pulse — animated status bar showing AI sentinel activity
+- Credential QR system — verifiable student credentials
+- Admissions portal (The Nexus) with AI course matching
 
-1. **Founder War Room** — KPI bento grid, Recharts dashboards, Red Switch (manual system refresh), Live Feed SSE, Announcement Hub (broadcasts to all dashboards), Data Bridge (CSV/JSON/URL student import), telemetry log
-2. **Coordinator Hub** — students, lecturers, course catalog, AI admissions, Sentinel Scheduler (timetable management with auto-activating Zoom/Meet links)
-3. **Lecturer Portal** — course view, Grade Entry (test/exam/assignment/attendance → weighted GPA with AI insight)
-4. **Student Portal** — course browser, timetable with live lecture links, AI grade report + CGPA, anti-cheat video player (key generation on 100% completion), cryptographic credential
+## User preferences
 
-Public routes: `/` (cinematic landing), `/login`, `/register`, `/verify/:token`
-
-## User Preferences
-
-- Deep navy (#0A192F) + cyan (#64FFDA) glassmorphism theme — no light mode
-- Framer Motion on all page transitions and card animations
-- Cmd+K command palette (`CommandMenu`) for power-user navigation
-- UOU Sentinel chatbot visible only to students (floating bottom-right widget)
-- Announcement ticker (SSE) pinned to top of all authenticated dashboards
-- Error boundary with self-repairing animation
+- Brand: UOU Institutional Blue (#3B82F6), background #040B1A deep navy, gold #F59E0B
+- No teal (#64FFDA) anywhere — fully replaced with electric blue
+- Cinematic, slow animations preferred — nothing feels rushed
 
 ## Gotchas
 
-- Run `pnpm run typecheck:libs` before API server typecheck (needs generated `.d.ts`)
-- Route handlers must use `requireAuth`/`requireRole` — NOT `authenticate`/`authorize`
-- DB table names use `Table` suffix in existing schema (e.g. `usersTable`, `coursesTable`) — new tables don't (grades, attendance, timetable, announcements, lectureKeys)
-- Never call `pnpm dev` at workspace root — use restart_workflow for individual artifacts
-- Cinematic intro stored in `sessionStorage` — replay by clearing `uou_intro_done`
-- SSE endpoints need `X-Accel-Buffering: no` header for nginx proxy compatibility
+- Run `pnpm --filter @workspace/db run push` after schema changes before restarting workflow
+- `qrcode.react` must be in `artifacts/uou-infinite/package.json` (added)
+- API server PORT must be `8080`; frontend PORT must be `22169` with `BASE_PATH=/`
+- The "UOU Infinite App" workflow runs both services with `&` — both must succeed
+
+## Pointers
+
+- DB schema: `lib/db/src/schema/index.ts`
+- API contract: `lib/api-spec/openapi.yaml`
+- Theme/CSS: `artifacts/uou-infinite/src/index.css`

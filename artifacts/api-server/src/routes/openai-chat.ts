@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, conversations, messages } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { requireOpenAI, openaiAvailable } from "@workspace/integrations-openai-ai-server";
 import { CreateOpenaiConversationBody, SendOpenaiMessageBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -71,7 +71,7 @@ router.post("/openai/conversations/:id/messages", requireAuth, async (req, res):
 
   let fullResponse = "";
   try {
-    const stream = await openai.chat.completions.create({
+    const stream = await requireOpenAI().chat.completions.create({
       model: "gpt-5.4",
       max_completion_tokens: 1024,
       messages: chatMessages,
