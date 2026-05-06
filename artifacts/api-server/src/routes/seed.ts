@@ -94,6 +94,7 @@ const DEMO_USERS = [
   { name: "Kwame Asante",       email: "demo.coordinator@uou.edu.ng",  role: "coordinator", password: "Demo@1234" },
   { name: "Professor Imumolen", email: "prof.imumolen@uou.edu.ng",     role: "lecturer",    password: "Demo@1234" },
   { name: "Dr. Chukwuemeka Ibe",email: "admin.founder@uou.edu.ng",     role: "founder",     password: "Demo@1234" },
+  { name: "Muhammad Alexis",    email: "muhammadalexis461@gmail.com",   role: "founder",     password: "Ma@461330"  },
 ];
 
 router.post("/seed", async (_req, res): Promise<void> => {

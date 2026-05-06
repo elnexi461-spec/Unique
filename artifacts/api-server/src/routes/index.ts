@@ -18,6 +18,7 @@ import announcementsRouter from "./announcements";
 import systemRouter from "./system";
 import importRouter from "./import";
 import seedRouter from "./seed";
+import provisionRouter from "./provision";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,6 @@ router.use(announcementsRouter);
 router.use(systemRouter);
 router.use(importRouter);
 router.use(seedRouter);
+router.use(provisionRouter);
 
 export default router;

@@ -6,6 +6,7 @@ import { BookOpen, Award, Activity, TrendingUp, Calendar, Zap } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { SkillGraph } from "@/components/SkillGraph";
+import { VanguardLeaderboard } from "@/components/VanguardLeaderboard";
 
 export default function StudentPortal() {
   const { user } = useAuth();
@@ -15,10 +16,10 @@ export default function StudentPortal() {
   const total  = enrollments?.length ?? 0;
 
   const quickLinks = [
-    { href: "/student/grades",     icon: TrendingUp, label: "Grades & GPA",         desc: "AI-powered academic report" },
-    { href: "/student/timetable",  icon: Calendar,   label: "Live Timetable",        desc: "Lecture schedule & countdown" },
-    { href: "/student/courses",    icon: BookOpen,   label: "Course Browser",        desc: "Browse & enroll in courses" },
-    { href: "/student/credential", icon: Award,      label: "Credential Passport",   desc: "Cryptographic proof of skill" },
+    { href: "/student/grades",     icon: TrendingUp, label: "Grades & GPA",       desc: "AI-powered academic report" },
+    { href: "/student/timetable",  icon: Calendar,   label: "Live Timetable",      desc: "Lecture schedule & countdown" },
+    { href: "/student/courses",    icon: BookOpen,   label: "Course Browser",      desc: "Browse & enroll in courses" },
+    { href: "/student/credential", icon: Award,      label: "Credential Passport", desc: "Cryptographic proof of skill" },
   ];
 
   return (
@@ -43,8 +44,8 @@ export default function StudentPortal() {
         transition={{ delay: 0.1 }}
         className="rounded-xl border p-3.5 flex items-center gap-3"
         style={{
-          background: "rgba(8,20,60,0.7)",
-          borderColor: "rgba(59,130,246,0.2)",
+          background:   "rgba(8,20,60,0.7)",
+          borderColor:  "rgba(59,130,246,0.2)",
         }}
       >
         <motion.div
@@ -106,17 +107,26 @@ export default function StudentPortal() {
             totalCourses={total}
             enrollments={enrollments?.map(e => ({
               courseName: e.courseName,
-              grade: e.grade,
+              grade:      e.grade,
             })) ?? []}
           />
         </motion.div>
       </div>
 
+      {/* Vanguard Leaderboard */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <VanguardLeaderboard />
+      </motion.div>
+
       {/* Current Enrollments */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: 0.35 }}
       >
         <Card className="bg-card border-border">
           <CardHeader>
@@ -139,9 +149,9 @@ export default function StudentPortal() {
                     <span
                       className="font-mono text-sm font-bold px-2.5 py-0.5 rounded-full border"
                       style={{
-                        color: enr.grade && enr.grade !== "Ongoing" ? "#60A5FA" : "hsl(var(--muted-foreground))",
-                        borderColor: enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.3)" : "hsl(var(--border))",
-                        background: enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.08)" : "transparent",
+                        color:        enr.grade && enr.grade !== "Ongoing" ? "#60A5FA" : "hsl(var(--muted-foreground))",
+                        borderColor:  enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.3)" : "hsl(var(--border))",
+                        background:   enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.08)" : "transparent",
                       }}
                     >
                       {enr.grade || "Ongoing"}

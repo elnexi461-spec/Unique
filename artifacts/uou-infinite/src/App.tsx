@@ -9,6 +9,7 @@ import { CommandMenu } from "@/components/command-menu";
 import { SentinelChat } from "@/components/sentinel-chat";
 import { AnnouncementTicker } from "@/components/AnnouncementTicker";
 import { SentinelPulse } from "@/components/SentinelPulse";
+import { SocialProofTicker } from "@/components/SocialProofTicker";
 import { useState } from "react";
 
 import NotFound from "@/pages/not-found";
@@ -89,6 +90,7 @@ function App() {
               <CommandMenu />
               <SentinelChat onActiveChange={setSentinelActive} />
               <SentinelPulse active={sentinelActive} label="UOU Sentinel Processing" />
+              <SocialProofTicker />
             </AuthProvider>
           </ErrorBoundary>
         </WouterRouter>
