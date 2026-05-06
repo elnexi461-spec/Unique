@@ -77,7 +77,7 @@ export function AnnouncementTicker() {
         background: isBreaking
           ? "linear-gradient(90deg, rgba(220,38,38,0.95), rgba(185,28,28,0.95))"
           : "linear-gradient(90deg, rgba(10,25,47,0.97), rgba(15,35,65,0.97))",
-        borderBottom: isBreaking ? "1px solid rgba(248,113,113,0.4)" : "1px solid rgba(100,255,218,0.2)",
+        borderBottom: isBreaking ? "1px solid rgba(248,113,113,0.4)" : "1px solid rgba(59,130,246,0.2)",
         backdropFilter: "blur(12px)",
       }}
     >
@@ -89,8 +89,8 @@ export function AnnouncementTicker() {
         <span
           className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
           style={{
-            background: isBreaking ? "rgba(248,113,113,0.2)" : "rgba(100,255,218,0.15)",
-            color: isBreaking ? "#fca5a5" : "#64FFDA",
+            background: isBreaking ? "rgba(248,113,113,0.2)" : "rgba(59,130,246,0.15)",
+            color: isBreaking ? "#fca5a5" : "#60A5FA",
           }}
         >
           {isBreaking ? "BREAKING" : "NOTICE"}

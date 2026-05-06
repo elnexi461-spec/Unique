@@ -154,7 +154,7 @@ export default function StudentTimetable() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="rounded-xl p-4 border"
-            style={{ background: "rgba(100,255,218,0.08)", borderColor: "rgba(100,255,218,0.4)" }}
+            style={{ background: "rgba(59,130,246,0.08)", borderColor: "rgba(59,130,246,0.4)" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <motion.div

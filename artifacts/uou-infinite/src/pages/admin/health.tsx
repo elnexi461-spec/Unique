@@ -73,7 +73,7 @@ export default function SystemHealth() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="bg-card border-primary/30 shadow-[0_0_20px_rgba(100,255,218,0.05)]">
+            <Card className="bg-card border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.08)]">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Activity className="h-5 w-5 text-primary" /> AI Diagnosis

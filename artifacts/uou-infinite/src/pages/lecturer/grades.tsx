@@ -76,7 +76,7 @@ export default function LecturerGrades() {
   };
 
   const preview = computePreview();
-  const GRADE_COLORS: Record<string, string> = { A: "#64FFDA", B: "#48b89f", C: "#f59e0b", D: "#f97316", E: "#ef4444", F: "#dc2626" };
+  const GRADE_COLORS: Record<string, string> = { A: "#60A5FA", B: "#34D399", C: "#F59E0B", D: "#F97316", E: "#EF4444", F: "#DC2626" };
 
   return (
     <div className="space-y-6">

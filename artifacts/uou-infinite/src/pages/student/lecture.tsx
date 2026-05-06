@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { AntiCheatPlayer } from "@/components/AntiCheatPlayer";
+import { LectureImageSlider } from "@/components/LectureImageSlider";
 import { QuizGateway } from "@/components/QuizGateway";
 import { GoldCard } from "@/components/GoldCard";
 import { RemedialBridge } from "@/components/RemedialBridge";
@@ -9,8 +9,6 @@ import { ArrowLeft, Shield, Brain, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useListCourses } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth-context";
-
-const DEMO_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
 type Phase = "recall" | "lecture" | "quiz" | "remedial" | "gold_card" | "complete";
 
@@ -31,12 +29,11 @@ export default function StudentLecture() {
   const [attempt, setAttempt] = useState(1);
   const [goldCardData, setGoldCardData] = useState<GoldCardData | null>(null);
 
-  const courseTitle = course?.title || `Course ${courseId} Lecture`;
+  const courseTitle = course?.title || "Principles of Entrepreneurship";
   const studentName = user?.name || "Scholar";
-  const studentId   = String(user?.id || "stu-001");
+  const studentId = String(user?.id || "stu-001");
 
   const handleLectureEnd = () => setLectureComplete(true);
-
   const handleStartQuiz = () => setPhase("quiz");
 
   const handleQuizPass = (score: number, grade: string, privateKey: string) => {
@@ -61,7 +58,7 @@ export default function StudentLecture() {
 
   const handleGoldCardDismiss = () => setPhase("complete");
 
-  const STEPS = ["Recap", "Lecture", "Assessment", "Gold Card"];
+  const STEPS = ["Recall", "Lecture", "Assessment", "Gold Card"];
   const stepIdx =
     phase === "recall" ? 0 :
     phase === "lecture" ? 1 :
@@ -82,9 +79,7 @@ export default function StudentLecture() {
               <span style={{
                 color: i === stepIdx ? "#3B82F6" : i < stepIdx ? "#60A5FA" : undefined,
                 fontWeight: i === stepIdx ? 700 : undefined,
-              }}>
-                {step}
-              </span>
+              }}>{step}</span>
               {i < STEPS.length - 1 && <ChevronRight size={10} className="opacity-30" />}
             </span>
           ))}
@@ -96,26 +91,24 @@ export default function StudentLecture() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{courseTitle}</h1>
           <p className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
             <Shield size={14} className="text-primary" />
-            Neural Ledger active · Micro-learning session · Attempt {attempt}/3
+            Neural Ledger active · Progressive slide lecture · Attempt {attempt}/3
           </p>
         </div>
 
         <AnimatePresence mode="wait">
 
-          {/* RECALL — 10-second "Previously on…" */}
+          {/* RECALL */}
           {phase === "recall" && (
-            <motion.div
-              key="recall"
+            <motion.div key="recall"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }}
               className="rounded-2xl border overflow-hidden"
-              style={{ background: "rgba(8,16,48,0.8)", borderColor: "rgba(59,130,246,0.25)" }}
-            >
+              style={{ background: "rgba(8,16,48,0.8)", borderColor: "rgba(59,130,246,0.25)" }}>
               <div className="p-4 border-b flex items-center gap-3" style={{ borderColor: "rgba(59,130,246,0.15)" }}>
                 <Brain size={16} className="text-primary" />
                 <div>
                   <div className="font-bold text-foreground text-sm">Previously on {courseTitle}</div>
-                  <div className="text-xs text-muted-foreground">10-second knowledge bridge — pages 1-3</div>
+                  <div className="text-xs text-muted-foreground">Knowledge bridge — pages 1-3</div>
                 </div>
                 <div className="ml-auto">
                   <span className="text-xs font-mono px-2 py-0.5 rounded-full border"
@@ -130,8 +123,7 @@ export default function StudentLecture() {
                   <motion.div animate={{ opacity: [0.12, 0.28, 0.12] }}
                     transition={{ duration: 3, repeat: Infinity }}
                     className="absolute inset-0 pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.15), transparent 60%)" }}
-                  />
+                    style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.15), transparent 60%)" }} />
                   <div className="relative z-10 space-y-3">
                     <div className="text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: "rgba(96,165,250,0.7)" }}>
                       Key Takeaway — Previous Session
@@ -140,17 +132,17 @@ export default function StudentLecture() {
                       In the last session of <strong className="text-primary">{courseTitle}</strong>, we
                       established the foundational framework. The critical insight:{" "}
                       <strong>real-world application always diverges from theoretical models</strong> due to
-                      contextual constraints — and recognizing this gap is the hallmark of an advanced practitioner.
+                      contextual constraints — recognising this gap is the hallmark of an advanced practitioner.
                     </p>
                     <svg width="100%" height="60" viewBox="0 0 300 60">
                       <motion.line x1="20" y1="30" x2="280" y2="30"
                         stroke="rgba(59,130,246,0.3)" strokeWidth="1" strokeDasharray="4 4" />
-                      {["Concept","Theory","Gap","Apply","Grow"].map((label, i) => (
+                      {["Concept", "Theory", "Gap", "Apply", "Grow"].map((label, i) => (
                         <g key={label}>
-                          <motion.circle cx={20+i*65} cy={30} r={6} fill="#1D4ED8" stroke="#60A5FA" strokeWidth="1.5"
-                            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i*0.15 }} />
-                          <motion.text x={20+i*65} y={52} textAnchor="middle" fontSize="8" fill="rgba(147,197,253,0.7)"
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i*0.15+0.2 }}>
+                          <motion.circle cx={20 + i * 65} cy={30} r={6} fill="#1D4ED8" stroke="#60A5FA" strokeWidth="1.5"
+                            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.15 }} />
+                          <motion.text x={20 + i * 65} y={52} textAnchor="middle" fontSize="8" fill="rgba(147,197,253,0.7)"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.15 + 0.2 }}>
                             {label}
                           </motion.text>
                         </g>
@@ -166,13 +158,13 @@ export default function StudentLecture() {
                   onClick={() => setPhase("lecture")}
                   className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg, #1D4ED8, #3B82F6)", color: "white", boxShadow: "0 0 24px rgba(59,130,246,0.35)" }}>
-                  Continue to Today's Lecture <ChevronRight size={16} />
+                  Begin Today's Lecture <ChevronRight size={16} />
                 </motion.button>
               </div>
             </motion.div>
           )}
 
-          {/* LECTURE */}
+          {/* LECTURE — Image Slider */}
           {phase === "lecture" && (
             <motion.div key="lecture"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -184,16 +176,14 @@ export default function StudentLecture() {
                 <div>
                   <div className="font-semibold text-primary">Academic Integrity Notice</div>
                   <p className="text-muted-foreground text-xs leading-relaxed mt-0.5">
-                    Rewind is permitted — forward-skipping is disabled. Complete 100% to unlock the Assessment Gateway.
+                    Sequential slide progression enforced — forward-skipping is disabled. Complete all slides to unlock the Assessment Gateway.
                     {attempt > 1 && <span className="text-yellow-400 font-semibold"> · Retry attempt {attempt}/3.</span>}
                   </p>
                 </div>
               </div>
-              <AntiCheatPlayer
-                src={DEMO_VIDEO}
+              <LectureImageSlider
+                courseTitle={courseTitle}
                 courseId={parseInt(courseId || "1")}
-                title={courseTitle}
-                keyType="attendance"
                 onLectureComplete={handleLectureEnd}
               />
               <AnimatePresence>
@@ -203,7 +193,7 @@ export default function StudentLecture() {
                       onClick={handleStartQuiz}
                       className="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2"
                       style={{ background: "linear-gradient(135deg, #0F4C8C, #1D4ED8, #3B82F6)", color: "white" }}
-                      animate={{ boxShadow: ["0 0 20px rgba(59,130,246,0.4)","0 0 40px rgba(59,130,246,0.7)","0 0 20px rgba(59,130,246,0.4)"] }}
+                      animate={{ boxShadow: ["0 0 20px rgba(59,130,246,0.4)", "0 0 40px rgba(59,130,246,0.7)", "0 0 20px rgba(59,130,246,0.4)"] }}
                       transition={{ duration: 2, repeat: Infinity }}>
                       <Brain size={18} /> Enter Assessment Gateway <ChevronRight size={16} />
                     </motion.button>
@@ -245,7 +235,8 @@ export default function StudentLecture() {
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
               className="rounded-2xl border p-8 text-center space-y-4"
               style={{ background: "rgba(8,20,60,0.8)", borderColor: "rgba(59,130,246,0.3)" }}>
-              <div className="text-4xl">🎓</div>
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-5xl">🎓</motion.div>
               <h2 className="text-2xl font-black text-foreground">Session Complete</h2>
               <p className="text-muted-foreground text-sm">Your Gold Card has been minted. The Sentinel acknowledges your achievement.</p>
               <Link href="/student">

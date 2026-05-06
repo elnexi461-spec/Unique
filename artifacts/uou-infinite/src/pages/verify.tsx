@@ -62,7 +62,7 @@ export default function VerifyPage() {
             >
               {result.valid ? (
                 <>
-                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border border-primary mb-6 shadow-[0_0_30px_rgba(100,255,218,0.3)]">
+                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border border-primary mb-6 shadow-[0_0_30px_rgba(59,130,246,0.4)]">
                     <ShieldCheck className="w-10 h-10 text-primary" />
                   </div>
                   <h2 className="text-2xl font-bold text-primary mb-1">Authentic Credential</h2>

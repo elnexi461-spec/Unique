@@ -40,7 +40,7 @@ export default function StudentCredential() {
       </div>
 
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-        <Card className="bg-card border-primary/50 shadow-[0_0_40px_rgba(100,255,218,0.1)] relative overflow-hidden">
+        <Card className="bg-card border-primary/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
           <CardContent className="p-8 flex flex-col items-center">

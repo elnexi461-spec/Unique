@@ -28,12 +28,12 @@ interface GradeData {
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const GRADE_COLORS: Record<string, string> = {
-  A: "#64FFDA",
-  B: "#48b89f",
-  C: "#f59e0b",
-  D: "#f97316",
-  E: "#ef4444",
-  F: "#dc2626",
+  A: "#60A5FA",
+  B: "#34D399",
+  C: "#F59E0B",
+  D: "#F97316",
+  E: "#EF4444",
+  F: "#DC2626",
 };
 
 export default function StudentGrades() {
@@ -53,7 +53,7 @@ export default function StudentGrades() {
   }, [user, token]);
 
   const cgpaNum = parseFloat(data?.cgpa || "0");
-  const cgpaColor = cgpaNum >= 4.0 ? "#64FFDA" : cgpaNum >= 3.0 ? "#48b89f" : cgpaNum >= 2.0 ? "#f59e0b" : "#ef4444";
+  const cgpaColor = cgpaNum >= 4.0 ? "#60A5FA" : cgpaNum >= 3.0 ? "#34D399" : cgpaNum >= 2.0 ? "#F59E0B" : "#EF4444";
 
   return (
     <div className="space-y-6">
@@ -107,7 +107,7 @@ export default function StudentGrades() {
           {data?.insight && (
             <div
               className="flex-1 flex items-start gap-3 rounded-xl p-4 border"
-              style={{ background: "rgba(100,255,218,0.05)", borderColor: "rgba(100,255,218,0.2)" }}
+              style={{ background: "rgba(59,130,246,0.06)", borderColor: "rgba(59,130,246,0.2)" }}
             >
               <Brain size={18} className="text-primary mt-0.5 shrink-0" />
               <div>
@@ -173,7 +173,7 @@ export default function StudentGrades() {
                             {grade}
                           </span>
                         </td>
-                        <td className="px-4 py-3 font-mono text-muted-foreground">{g.gradePoints || g.points || "—"}</td>
+                        <td className="px-4 py-3 font-mono text-muted-foreground">{g.points || "—"}</td>
                       </motion.tr>
                     );
                   })}

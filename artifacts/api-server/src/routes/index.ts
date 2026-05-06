@@ -17,6 +17,7 @@ import timetableRouter from "./timetable";
 import announcementsRouter from "./announcements";
 import systemRouter from "./system";
 import importRouter from "./import";
+import seedRouter from "./seed";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use(timetableRouter);
 router.use(announcementsRouter);
 router.use(systemRouter);
 router.use(importRouter);
+router.use(seedRouter);
 
 export default router;
