@@ -64,10 +64,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="p-6 border-b border-sidebar-border">
           <Link href="/">
             <div className="font-bold text-xl tracking-tight text-primary flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/50">
-                <span className="text-primary text-sm">UOU</span>
-              </div>
-              Infinite
+              <img
+                src="/uou-logo.png"
+                alt="UOU"
+                className="w-9 h-9 object-contain"
+                style={{ filter: "drop-shadow(0 0 6px rgba(59,130,246,0.45))" }}
+              />
+              <span>Infinite</span>
             </div>
           </Link>
         </div>

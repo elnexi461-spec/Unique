@@ -56,9 +56,12 @@ export default function LoginPage() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
           <div className="flex flex-col items-center mb-8">
-            <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50 mb-4 shadow-[0_0_20px_rgba(100,255,218,0.2)]">
-              <Shield className="text-primary w-6 h-6" />
-            </div>
+            <img
+              src="/uou-logo.png"
+              alt="Unique Open University"
+              className="w-16 h-16 object-contain mb-4"
+              style={{ filter: "drop-shadow(0 0 12px rgba(59,130,246,0.55))" }}
+            />
             <h2 className="text-2xl font-bold tracking-tight">System Authorization</h2>
             <p className="text-muted-foreground text-sm mt-1">Enter your credentials to access the terminal</p>
           </div>

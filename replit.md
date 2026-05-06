@@ -31,7 +31,7 @@ artifacts/uou-infinite/src/
   pages/landing.tsx          # Homepage with staggered animations
   pages/student/            # portal, lecture, credential pages
   components/
-    CinematicIntro.tsx       # UOU orb + portal zoom (9.5s sequence)
+    CinematicIntro.tsx       # Real UOU logo bouncing + portal zoom (9.5s, tap-to-skip)
     GoldCard.tsx             # 3D gold shimmer on quiz pass
     QuizGateway.tsx          # 10-question gateway, 120s timer, Web Crypto key
     SentinelPulse.tsx        # Bottom blue pulse bar
@@ -54,7 +54,7 @@ lib/api-spec/openapi.yaml        # OpenAPI contract (source of truth)
 
 ## Product
 
-- Cinematic intro with UOU logo orb physics and portal zoom
+- Cinematic intro with real UOU logo (`/uou-logo.png`, transparent PNG) bouncing with glow halo and portal zoom
 - Role-based portals: Student (Neural Skill Graph, lecture flow) / Lecturer / Admin (Founder's War Room)
 - Assessment Gateway — 10 application-based questions, 120s countdown, pass → Gold Card ceremony
 - Three-Strike remedial bridge — 3 failures triggers AI remedial + 2hr cooldown
@@ -64,7 +64,8 @@ lib/api-spec/openapi.yaml        # OpenAPI contract (source of truth)
 
 ## User preferences
 
-- Brand: UOU Institutional Blue (#3B82F6), background #040B1A deep navy, gold #F59E0B
+- Brand: UOU Institutional Blue (#3B82F6), background navy `hsl(222 72% 6%)` (matched to logo), gold #F59E0B
+- Real UOU logo PNG (`artifacts/uou-infinite/public/uou-logo.png`, background removed) used in CinematicIntro, landing hero, login, register, and sidebar
 - No teal (#64FFDA) anywhere — fully replaced with electric blue
 - Cinematic, slow animations preferred — nothing feels rushed
 

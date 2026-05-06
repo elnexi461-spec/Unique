@@ -66,26 +66,26 @@
   --elevate-1: rgba(255,255,255, .03);
   --elevate-2: rgba(255,255,255, .07);
 
-  /* Luminous radial background: deep blue-black edges, electric blue center stage */
-  --background: 222 75% 4%;
+  /* Institutional Navy — matched to UOU logo's deep royal blue */
+  --background: 222 72% 6%;
   --foreground: 210 100% 97%;
 
-  --border: 220 55% 18%;
-  --input: 220 55% 18%;
+  --border: 221 58% 20%;
+  --input: 221 58% 20%;
   --ring: 217 91% 60%;
 
-  /* Card surfaces — deep institutional blue */
-  --card: 221 65% 8%;
+  /* Card surfaces — institutional dark navy */
+  --card: 221 65% 9%;
   --card-foreground: 210 100% 97%;
-  --card-border: 220 55% 18%;
+  --card-border: 221 55% 20%;
 
-  --popover: 221 65% 8%;
+  --popover: 221 65% 9%;
   --popover-foreground: 210 100% 97%;
-  --popover-border: 220 55% 18%;
+  --popover-border: 221 55% 20%;
 
   /* Electric Brand Blue — primary interactive color */
   --primary: 217 91% 60%;
-  --primary-foreground: 222 75% 4%;
+  --primary-foreground: 222 72% 6%;
 
   --secondary: 220 50% 13%;
   --secondary-foreground: 210 100% 97%;
@@ -155,25 +155,25 @@
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
-  --background: 222 75% 4%;
+  --background: 222 72% 6%;
   --foreground: 210 100% 97%;
-  --border: 220 55% 18%;
-  --input:  220 55% 18%;
+  --border: 221 58% 20%;
+  --input:  221 58% 20%;
   --ring:   217 91% 60%;
-  --card:   221 65% 8%;
+  --card:   221 65% 9%;
   --card-foreground: 210 100% 97%;
-  --card-border: 220 55% 18%;
-  --popover: 221 65% 8%;
+  --card-border: 221 55% 20%;
+  --popover: 221 65% 9%;
   --popover-foreground: 210 100% 97%;
-  --popover-border: 220 55% 18%;
+  --popover-border: 221 55% 20%;
   --primary: 217 91% 60%;
-  --primary-foreground: 222 75% 4%;
+  --primary-foreground: 222 72% 6%;
   --secondary: 220 50% 13%;
   --secondary-foreground: 210 100% 97%;
   --muted: 220 50% 13%;
   --muted-foreground: 215 35% 60%;
   --accent: 217 91% 60%;
-  --accent-foreground: 222 75% 4%;
+  --accent-foreground: 222 72% 6%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
   --chart-1: 217 91% 60%;
@@ -181,12 +181,12 @@
   --chart-3: 270 91% 65%;
   --chart-4: 142 71% 55%;
   --chart-5: 43 96% 56%;
-  --sidebar: 222 75% 5%;
+  --sidebar: 222 72% 7%;
   --sidebar-foreground: 210 100% 97%;
-  --sidebar-border: 220 55% 18%;
+  --sidebar-border: 221 58% 20%;
   --sidebar-primary: 217 91% 60%;
-  --sidebar-primary-foreground: 222 75% 4%;
-  --sidebar-accent: 221 65% 12%;
+  --sidebar-primary-foreground: 222 72% 6%;
+  --sidebar-accent: 221 65% 13%;
   --sidebar-accent-foreground: 210 100% 97%;
   --sidebar-ring: 217 91% 60%;
   --shadow-2xs: 0px 2px 0px 0px rgba(59, 130, 246, 0.10);

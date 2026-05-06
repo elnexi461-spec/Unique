@@ -116,19 +116,19 @@ export default function LandingPage() {
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="text-center max-w-5xl relative z-10"
         >
-          {/* Logo orb */}
+          {/* Official UOU Logo */}
           <motion.div
             whileHover={{ scale: 1.06 }}
-            animate={{ boxShadow: ["0 0 24px rgba(59,130,246,0.25)", "0 0 48px rgba(59,130,246,0.5)", "0 0 24px rgba(59,130,246,0.25)"] }}
+            animate={{ filter: ["drop-shadow(0 0 12px rgba(59,130,246,0.4))", "drop-shadow(0 0 28px rgba(59,130,246,0.7))", "drop-shadow(0 0 12px rgba(59,130,246,0.4))"] }}
             transition={{ duration: 3, repeat: Infinity }}
-            className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center border mb-8 cursor-default"
-            style={{
-              background: "radial-gradient(circle at 35% 35%, #60A5FA, #1D4ED8 60%, #0B1E4A)",
-              borderColor: "rgba(59,130,246,0.4)",
-              backdropFilter: "blur(20px)",
-            }}
+            className="w-24 h-24 mx-auto mb-8 cursor-default"
           >
-            <span className="text-white font-black text-xl tracking-tight">UOU</span>
+            <img
+              src="/uou-logo.png"
+              alt="Unique Open University"
+              className="w-full h-full object-contain"
+              style={{ filter: "drop-shadow(0 0 18px rgba(59,130,246,0.55))" }}
+            />
           </motion.div>
 
           {/* Main headline — staggered per word */}
