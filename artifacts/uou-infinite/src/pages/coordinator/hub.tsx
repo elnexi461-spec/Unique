@@ -1,9 +1,9 @@
-import { useListStudents, useListCourses, useListLecturers, useGetDashboardOverview } from "@workspace/api-client-react";
+import { useGetDashboardOverview } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, FileText, ArrowRight, UserPlus, BookPlus } from "lucide-react";
+import { Users, BookOpen, FileText, ArrowRight, UserPlus, BookPlus, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function CoordinatorHub() {
@@ -14,6 +14,7 @@ export default function CoordinatorHub() {
     { title: "Manage Lecturers", desc: "Department allocations and assignments", href: "/coordinator/lecturers", icon: UserPlus, count: overview?.totalLecturers || 0 },
     { title: "Course Catalog", desc: "Create and edit course offerings", href: "/coordinator/courses", icon: BookPlus, count: overview?.totalCourses || 0 },
     { title: "Admissions Pipeline", desc: "AI-assisted application review", href: "/coordinator/admissions", icon: FileText, count: overview?.pendingAdmissions || 0, badge: "Pending" },
+    { title: "Sentinel Scheduler", desc: "Timetable with auto-activating live links", href: "/coordinator/timetable", icon: Calendar, count: 0 },
   ];
 
   return (
@@ -53,7 +54,9 @@ export default function CoordinatorHub() {
               <CardContent className="relative z-10">
                 <p className="text-muted-foreground mb-6">{sec.desc}</p>
                 <div className="flex items-center justify-between">
-                  <div className="text-2xl font-bold text-foreground">{sec.count} <span className="text-sm font-normal text-muted-foreground">total</span></div>
+                  {sec.count > 0 || sec.badge ? (
+                    <div className="text-2xl font-bold text-foreground">{sec.count} <span className="text-sm font-normal text-muted-foreground">total</span></div>
+                  ) : <div />}
                   <Link href={sec.href}>
                     <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
                       Access <ArrowRight className="ml-2 w-4 h-4" />

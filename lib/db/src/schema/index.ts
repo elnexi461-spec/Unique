@@ -7,3 +7,8 @@ export * from "./admissions";
 export * from "./log_entries";
 export * from "./conversations";
 export * from "./messages";
+export * from "./grades";
+export * from "./attendance";
+export * from "./timetable";
+export * from "./announcements";
+export * from "./lecture_keys";

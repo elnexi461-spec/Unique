@@ -19,39 +19,42 @@
 - **Monorepo**: pnpm workspaces, Node.js 24, TypeScript 5.9
 - **Frontend**: React + Vite + Wouter + Framer Motion + Recharts + shadcn/ui
 - **Backend**: Express 5, PostgreSQL + Drizzle ORM, JWT auth (SESSION_SECRET)
-- **AI**: OpenAI via `@workspace/integrations-openai-ai-server` (AI_INTEGRATIONS_OPENAI_API_KEY)
+- **AI**: OpenAI via `@workspace/integrations-openai-ai-server`
 - **Codegen**: Orval (OpenAPI → React Query hooks + Zod schemas)
-- **QR**: qrcode.react for student credential NFT-style verification
+- **Scheduler**: node-cron (midnight sentinel auto-heal)
+- **Import**: multer + papaparse (CSV/JSON/URL student import)
 
 ## Where Things Live
 
 - `lib/api-spec/openapi.yaml` — authoritative OpenAPI spec (source of truth)
-- `lib/db/src/schema/` — Drizzle schema files (users, students, lecturers, courses, enrollments, admissions, log_entries, conversations, messages)
-- `artifacts/api-server/src/routes/` — all Express route handlers
-- `artifacts/api-server/src/middlewares/auth.ts` — JWT middleware + RBAC
-- `artifacts/api-server/src/lib/jwt.ts` — JWT sign/verify
-- `artifacts/uou-infinite/src/pages/` — all UI pages by role (founder/, coordinator/, lecturer/, student/, admin/)
-- `artifacts/uou-infinite/src/components/` — layout, error-boundary, sentinel-chat, command-menu
+- `lib/db/src/schema/` — Drizzle schema (users, students, lecturers, courses, enrollments, admissions, log_entries, conversations, messages, **grades, attendance, timetable, announcements, lecture_keys**)
+- `artifacts/api-server/src/routes/` — all Express route handlers (auth, students, grades, attendance, timetable, announcements, system, import)
+- `artifacts/api-server/src/middlewares/auth.ts` — `requireAuth` / `requireRole` JWT middleware
+- `artifacts/uou-infinite/src/pages/` — all UI pages by role
+- `artifacts/uou-infinite/src/components/` — CinematicIntro, AnnouncementTicker, AntiCheatPlayer, layout, sentinel-chat, command-menu
 
 ## Architecture Decisions
 
 - **Contract-first API**: OpenAPI spec drives all codegen; never edit generated files directly
-- **JWT in localStorage** (`uou_token`): custom-fetch reads it automatically for every API call
-- **Password hashing**: SHA256 + "uou_salt" suffix (simple, no bcrypt dependency)
-- **AI SSE streaming**: `/api/openai/conversations/:id/messages` streams GPT responses via text/event-stream
-- **At-risk scoring**: Computed on-the-fly from login_count, GPA, and last_login_at (no separate table)
-- **QR credential**: Token stored in students table; `/api/verify/:token` is public (no auth required)
-- **lib/api-zod index.ts**: Must remain as single `export * from "./generated/api"` — Orval regenerates it
+- **JWT in localStorage** (`uou_token`): custom-fetch reads it; `getAuthToken()` from `./lib/auth`
+- **Route prefix**: `app.use("/api", router)` — all route handlers must NOT include `/api` prefix
+- **Password hashing**: SHA256 + "uou_salt" suffix
+- **AI SSE streaming**: `/api/openai/conversations/:id/messages` streams GPT responses
+- **Anti-cheat**: HTML5 video `timeupdate` enforces max-watched position; forward-skipping snaps back
+- **Key lifecycle**: 16-char hex keys expire in 24h; midnight cron prunes expired keys
+- **SSE channels**: `/api/announcements/stream` (all users), `/api/system/live-feed` (founder/coordinator)
+- **Cinematic intro**: Framer Motion spring bounce ball → letter morph → zoom portal; sessionStorage flag `uou_intro_done` prevents replay
 
 ## Product
 
 Four role-based personas accessible after JWT login:
-1. **Founder War Room** — live KPI bento grid, Recharts dashboards (engagement, geo, course distribution), telemetry log
-2. **Coordinator Hub** — students list, lecturers, course catalog, AI admissions pipeline with OpenAI match scoring
-3. **Lecturer Portal** — course and grade management view
-4. **Student Portal** — course browser, proof-of-skill credential with QR code, UOU Sentinel AI chatbot (SSE)
 
-Public routes: `/` (landing), `/login`, `/register`, `/verify/:token` (credential QR gateway)
+1. **Founder War Room** — KPI bento grid, Recharts dashboards, Red Switch (manual system refresh), Live Feed SSE, Announcement Hub (broadcasts to all dashboards), Data Bridge (CSV/JSON/URL student import), telemetry log
+2. **Coordinator Hub** — students, lecturers, course catalog, AI admissions, Sentinel Scheduler (timetable management with auto-activating Zoom/Meet links)
+3. **Lecturer Portal** — course view, Grade Entry (test/exam/assignment/attendance → weighted GPA with AI insight)
+4. **Student Portal** — course browser, timetable with live lecture links, AI grade report + CGPA, anti-cheat video player (key generation on 100% completion), cryptographic credential
+
+Public routes: `/` (cinematic landing), `/login`, `/register`, `/verify/:token`
 
 ## User Preferences
 
@@ -59,11 +62,14 @@ Public routes: `/` (landing), `/login`, `/register`, `/verify/:token` (credentia
 - Framer Motion on all page transitions and card animations
 - Cmd+K command palette (`CommandMenu`) for power-user navigation
 - UOU Sentinel chatbot visible only to students (floating bottom-right widget)
-- Error boundary with self-repairing animation (3s spin before showing retry button)
+- Announcement ticker (SSE) pinned to top of all authenticated dashboards
+- Error boundary with self-repairing animation
 
 ## Gotchas
 
-- Run `pnpm run typecheck:libs` before API server typecheck (needs generated `.d.ts` from lib/integrations-openai-ai-server)
-- Do not add `queryKey` workarounds everywhere — pass `getXQueryKey()` helpers from Orval when needed
+- Run `pnpm run typecheck:libs` before API server typecheck (needs generated `.d.ts`)
+- Route handlers must use `requireAuth`/`requireRole` — NOT `authenticate`/`authorize`
+- DB table names use `Table` suffix in existing schema (e.g. `usersTable`, `coursesTable`) — new tables don't (grades, attendance, timetable, announcements, lectureKeys)
 - Never call `pnpm dev` at workspace root — use restart_workflow for individual artifacts
-- `conversations` and `messages` tables come from AI integration template schemas
+- Cinematic intro stored in `sessionStorage` — replay by clearing `uou_intro_done`
+- SSE endpoints need `X-Accel-Buffering: no` header for nginx proxy compatibility

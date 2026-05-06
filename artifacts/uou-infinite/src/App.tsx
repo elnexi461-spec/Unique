@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { AppLayout } from "@/components/layout";
 import { CommandMenu } from "@/components/command-menu";
 import { SentinelChat } from "@/components/sentinel-chat";
+import { AnnouncementTicker } from "@/components/AnnouncementTicker";
 
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
@@ -19,26 +20,22 @@ import StudentsList from "@/pages/coordinator/students";
 import LecturersList from "@/pages/coordinator/lecturers";
 import CourseCatalog from "@/pages/coordinator/courses";
 import AdmissionsPage from "@/pages/coordinator/admissions";
+import CoordinatorTimetable from "@/pages/coordinator/timetable";
+
 import LecturerPortal from "@/pages/lecturer/portal";
+import LecturerGrades from "@/pages/lecturer/grades";
+
 import StudentPortal from "@/pages/student/portal";
 import StudentCourses from "@/pages/student/courses";
 import StudentCredential from "@/pages/student/credential";
+import StudentGrades from "@/pages/student/grades";
+import StudentTimetable from "@/pages/student/timetable";
+import StudentLecture from "@/pages/student/lecture";
+
 import SystemHealth from "@/pages/admin/health";
 import VerifyPage from "@/pages/verify";
 
 const queryClient = new QueryClient();
-
-// Placeholder for unbuilt pages
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <div className="text-center p-12 border border-border rounded-2xl bg-card">
-        <h1 className="text-3xl font-bold text-primary mb-4">{title}</h1>
-        <p className="text-muted-foreground">This command center module is initializing...</p>
-      </div>
-    </div>
-  );
-}
 
 function Router() {
   return (
@@ -47,21 +44,34 @@ function Router() {
         <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} />
-        
-        {/* Active Routes */}
+
+        {/* Founder */}
         <Route path="/founder" component={FounderPage} />
+
+        {/* Coordinator */}
         <Route path="/coordinator" component={CoordinatorHub} />
         <Route path="/coordinator/students" component={StudentsList} />
         <Route path="/coordinator/lecturers" component={LecturersList} />
         <Route path="/coordinator/courses" component={CourseCatalog} />
         <Route path="/coordinator/admissions" component={AdmissionsPage} />
+        <Route path="/coordinator/timetable" component={CoordinatorTimetable} />
+
+        {/* Lecturer */}
         <Route path="/lecturer" component={LecturerPortal} />
+        <Route path="/lecturer/grades" component={LecturerGrades} />
+
+        {/* Student */}
         <Route path="/student" component={StudentPortal} />
         <Route path="/student/courses" component={StudentCourses} />
         <Route path="/student/credential" component={StudentCredential} />
+        <Route path="/student/grades" component={StudentGrades} />
+        <Route path="/student/timetable" component={StudentTimetable} />
+        <Route path="/student/lecture/:courseId" component={StudentLecture} />
+
+        {/* System */}
         <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/admin/health" component={SystemHealth} />
-        
+
         <Route component={NotFound} />
       </Switch>
     </AppLayout>
@@ -75,6 +85,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <ErrorBoundary>
             <AuthProvider>
+              <AnnouncementTicker />
               <Router />
               <CommandMenu />
               <SentinelChat />

@@ -2,26 +2,47 @@ import { useListCourses, useListStudents } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, Clock } from "lucide-react";
+import { Users, BookOpen, TrendingUp, Calendar } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { Link } from "wouter";
 
 export default function LecturerPortal() {
   const { user } = useAuth();
-  
-  // In a real app we would pass lecturerId: user?.id to filter,
-  // here we fetch all and filter in memory for prototype if needed,
-  // but let's just show the courses
   const { data: courses } = useListCourses();
   const { data: students } = useListStudents();
+  const myCourses = courses?.filter(c => c.lecturerId === user?.id) || courses?.slice(0, 3);
 
-  // Filter courses by this lecturer's ID (assuming user.id matches lecturer.userId in prototype)
-  const myCourses = courses?.filter(c => c.lecturerId === user?.id) || courses?.slice(0, 3); // Fallback to first 3 for demo
+  const quickLinks = [
+    { href: "/lecturer/grades", icon: TrendingUp, label: "Grade Entry", desc: "Record test, exam, and assignment scores" },
+    { href: "/lecturer", icon: Calendar, label: "My Portal", desc: "Courses and student overview" },
+  ];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Lecturer Portal</h1>
         <p className="text-muted-foreground mt-1">Manage your courses and student grades</p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {quickLinks.map((item, i) => (
+          <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+            <Link href={item.href}>
+              <div className="group cursor-pointer rounded-xl border border-border bg-card p-5 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                    <item.icon size={18} className="text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground group-hover:text-primary transition-colors">{item.label}</div>
+                    <div className="text-sm text-muted-foreground mt-0.5">{item.desc}</div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -49,9 +70,7 @@ export default function LecturerPortal() {
             </motion.div>
           ))}
           {myCourses?.length === 0 && (
-             <div className="text-center py-12 border border-dashed border-border rounded-xl text-muted-foreground">
-               No assigned courses found.
-             </div>
+            <div className="text-center py-12 border border-dashed border-border rounded-xl text-muted-foreground">No assigned courses found.</div>
           )}
         </div>
 

@@ -6,12 +6,14 @@ import { useLocation } from "wouter";
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isLoading: boolean;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  token: null,
   isLoading: true,
   logout: () => {},
 });
@@ -27,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     location === "/login" ||
     location === "/register";
 
-  const { data: user, isLoading, error } = useGetMe({
+  const { data: user, isLoading } = useGetMe({
     query: {
       enabled: !!token,
       retry: false,
@@ -47,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user: user || null, isLoading, logout }}>
+    <AuthContext.Provider value={{ user: user || null, token, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );

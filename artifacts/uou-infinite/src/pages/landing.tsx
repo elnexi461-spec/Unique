@@ -1,93 +1,428 @@
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Shield, Users, BookOpen, GraduationCap } from "lucide-react";
+import { Shield, Users, BookOpen, GraduationCap, MapPin, Zap, Globe, ChevronDown } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { CinematicIntro } from "@/components/CinematicIntro";
+
+const NEWS = [
+  { id: 1, category: "AI Update", title: "UOU Sentinel AI now tracks at-risk students in real time", date: "May 2026" },
+  { id: 2, category: "Academic", title: "New semester timetable published — check your portal now", date: "Apr 2026" },
+  { id: 3, category: "Technology", title: "Cryptographic Proof of Attendance now live for all courses", date: "Mar 2026" },
+  { id: 4, category: "Research", title: "UOU partners with 12 research institutions across West Africa", date: "Feb 2026" },
+];
+
+const CAMPUS_CENTERS = [
+  { id: 1, name: "Lagos Main Campus", x: 28, y: 52, active: true },
+  { id: 2, name: "Abuja Centre", x: 48, y: 38, active: true },
+  { id: 3, name: "Kano Hub", x: 50, y: 22, active: false },
+  { id: 4, name: "Port Harcourt", x: 35, y: 65, active: true },
+  { id: 5, name: "Enugu Centre", x: 45, y: 57, active: false },
+  { id: 6, name: "Ibadan Node", x: 25, y: 48, active: true },
+];
 
 export default function LandingPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const [introComplete, setIntroComplete] = useState(() => {
+    return sessionStorage.getItem("uou_intro_done") === "1";
+  });
+  const [hoveredCenter, setHoveredCenter] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -60]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
 
-  if (user) {
-    // Redirect based on role if already logged in
-    switch (user.role) {
-      case "founder": setLocation("/founder"); break;
-      case "coordinator": setLocation("/coordinator"); break;
-      case "lecturer": setLocation("/lecturer"); break;
-      case "student": setLocation("/student"); break;
-      default: break;
+  useEffect(() => {
+    if (user) {
+      switch (user.role) {
+        case "founder": setLocation("/founder"); break;
+        case "coordinator": setLocation("/coordinator"); break;
+        case "lecturer": setLocation("/lecturer"); break;
+        case "student": setLocation("/student"); break;
+      }
     }
-    return null;
-  }
+  }, [user]);
+
+  const handleIntroComplete = () => {
+    sessionStorage.setItem("uou_intro_done", "1");
+    setIntroComplete(true);
+  };
 
   const roles = [
-    { title: "Founder", icon: Shield, desc: "Command center for institutional KPIs", role: "founder" },
-    { title: "Coordinator", icon: Users, desc: "Manage students, lecturers, and courses", role: "coordinator" },
-    { title: "Lecturer", icon: BookOpen, desc: "Manage courses and grades", role: "lecturer" },
-    { title: "Student", icon: GraduationCap, desc: "Access courses, grades, and credentials", role: "student" }
+    { title: "Founder", icon: Shield, desc: "Command center for institutional KPIs", role: "founder", color: "#64FFDA" },
+    { title: "Coordinator", icon: Users, desc: "Manage students, lecturers, and courses", role: "coordinator", color: "#48b89f" },
+    { title: "Lecturer", icon: BookOpen, desc: "Manage courses and grades", role: "lecturer", color: "#2d7a6a" },
+    { title: "Student", icon: GraduationCap, desc: "Access courses, grades, and credentials", role: "student", color: "#64FFDA" },
   ];
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background z-0" />
-      
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-3xl mb-12"
-        >
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/50 mb-6 shadow-[0_0_40px_rgba(100,255,218,0.3)]">
-            <span className="text-primary font-bold text-3xl">UOU</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 tracking-tight">
-            Institutional <span className="text-primary">Operating System</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            A premium, high-density command center for Unique Open University. Precise, fluid, and powerful.
-          </p>
-        </motion.div>
+  if (!introComplete) {
+    return <CinematicIntro onComplete={handleIntroComplete} />;
+  }
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+  return (
+    <div ref={containerRef} className="min-h-screen bg-background overflow-x-hidden">
+      {/* Hero Section */}
+      <motion.section
+        style={{ y: heroY, opacity: heroOpacity }}
+        className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden"
+      >
+        {/* Animated geometric grid background */}
+        <div className="absolute inset-0 overflow-hidden opacity-15 pointer-events-none">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hero-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+                <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#64FFDA" strokeWidth="0.6" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hero-grid)" />
+          </svg>
+        </div>
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.18, 0.1] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(100,255,218,0.15), transparent 70%)" }}
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-5xl mb-12"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-5xl relative z-10"
         >
-          {roles.map((r, i) => (
-            <motion.div
-              key={r.title}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 + (i * 0.1) }}
-              className="bg-card border border-border p-6 rounded-xl hover:border-primary/50 transition-colors group cursor-pointer"
-              onClick={() => setLocation(`/register?role=${r.role}`)}
+          {/* Logo */}
+          <motion.div
+            whileHover={{ scale: 1.05, boxShadow: "0 0 60px rgba(100,255,218,0.5)" }}
+            className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center border border-primary/50 mb-8 cursor-default"
+            style={{
+              background: "linear-gradient(135deg, rgba(100,255,218,0.15), rgba(100,255,218,0.05))",
+              boxShadow: "0 0 40px rgba(100,255,218,0.25)",
+              backdropFilter: "blur(20px)",
+            }}
+          >
+            <span className="text-primary font-black text-2xl tracking-tight">UOU</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.7 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-white mb-6 leading-none"
+          >
+            Unique{" "}
+            <span
+              className="inline-block"
+              style={{ color: "#64FFDA", textShadow: "0 0 60px rgba(100,255,218,0.4)" }}
             >
-              <r.icon className="w-8 h-8 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-lg font-semibold mb-2">{r.title}</h3>
-              <p className="text-sm text-muted-foreground">{r.desc}</p>
-            </motion.div>
-          ))}
+              Open
+            </span>{" "}
+            University
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+          >
+            A next-generation Institutional Operating System. Precise, intelligent, and self-healing.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="flex items-center justify-center gap-4 flex-wrap"
+          >
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="h-12 px-8 text-base font-semibold"
+                style={{
+                  background: "#64FFDA",
+                  color: "#050D1A",
+                  boxShadow: "0 0 30px rgba(100,255,218,0.35)",
+                }}
+              >
+                Begin Session
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 px-8 text-base font-semibold border-primary/40 text-primary hover:bg-primary/10"
+              >
+                Initialize Account
+              </Button>
+            </Link>
+          </motion.div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="flex items-center gap-4"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-muted-foreground"
         >
+          <ChevronDown size={24} />
+        </motion.div>
+      </motion.section>
+
+      {/* Role Cards */}
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">Four Portals, One System</h2>
+            <p className="text-muted-foreground text-lg">Each role gets a bespoke command interface tailored to their mission.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {roles.map((r, i) => (
+              <motion.div
+                key={r.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                onClick={() => setLocation(`/register?role=${r.role}`)}
+                className="relative group cursor-pointer rounded-2xl p-6 border overflow-hidden"
+                style={{
+                  background: "rgba(10,25,47,0.6)",
+                  borderColor: "rgba(100,255,218,0.15)",
+                  backdropFilter: "blur(20px)",
+                }}
+              >
+                <motion.div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(circle at 50% 0%, ${r.color}15, transparent 70%)`,
+                  }}
+                />
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 border transition-all group-hover:scale-110"
+                  style={{ background: `${r.color}15`, borderColor: `${r.color}30`, color: r.color }}
+                >
+                  <r.icon size={20} />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{r.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{r.desc}</p>
+                <div
+                  className="absolute bottom-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500"
+                  style={{ background: `linear-gradient(90deg, ${r.color}, transparent)` }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Campus Center Locator Map */}
+      <section className="py-24 px-6 relative overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(100,255,218,0.04), transparent 70%)" }}
+        />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 text-primary text-sm font-medium bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
+              <Globe size={14} /> Learning Centers Network
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-4">Campus Center Locator</h2>
+            <p className="text-muted-foreground text-lg">Active learning hubs across Nigeria, all connected to UOU Infinite.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Map */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="relative rounded-2xl overflow-hidden border aspect-[4/3]"
+              style={{
+                background: "rgba(10,25,47,0.8)",
+                borderColor: "rgba(100,255,218,0.15)",
+              }}
+            >
+              {/* Stylized Nigeria map SVG silhouette */}
+              <svg viewBox="0 0 100 100" className="w-full h-full opacity-30 absolute inset-0">
+                <path d="M20,30 L30,20 L50,18 L65,22 L75,28 L80,40 L75,55 L65,68 L55,75 L40,78 L28,70 L22,58 L18,45 Z"
+                  fill="none" stroke="#64FFDA" strokeWidth="0.8" />
+              </svg>
+              {/* Grid overlay */}
+              <svg viewBox="0 0 100 100" className="w-full h-full absolute inset-0 opacity-10">
+                <defs>
+                  <pattern id="map-grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#64FFDA" strokeWidth="0.3"/>
+                  </pattern>
+                </defs>
+                <rect width="100" height="100" fill="url(#map-grid)" />
+              </svg>
+
+              {/* Campus center dots */}
+              {CAMPUS_CENTERS.map(center => (
+                <motion.button
+                  key={center.id}
+                  className="absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${center.x}%`, top: `${center.y}%` }}
+                  whileHover={{ scale: 1.5 }}
+                  onHoverStart={() => setHoveredCenter(center.id)}
+                  onHoverEnd={() => setHoveredCenter(null)}
+                >
+                  <div className="relative">
+                    <motion.div
+                      animate={{ scale: center.active ? [1, 2, 1] : 1, opacity: center.active ? [0.6, 0, 0.6] : 0.3 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: center.active ? "#64FFDA" : "#666", transform: "scale(2)" }}
+                    />
+                    <div
+                      className="w-3 h-3 rounded-full relative z-10 border-2"
+                      style={{
+                        background: center.active ? "#64FFDA" : "#333",
+                        borderColor: center.active ? "#64FFDA" : "#555",
+                        boxShadow: center.active ? "0 0 10px rgba(100,255,218,0.8)" : "none",
+                      }}
+                    />
+                  </div>
+                  <AnimatePresence>
+                    {hoveredCenter === center.id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4, scale: 0.9 }}
+                        animate={{ opacity: 1, y: -8, scale: 1 }}
+                        exit={{ opacity: 0, y: -4, scale: 0.9 }}
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap text-xs font-medium px-2 py-1 rounded-md z-20"
+                        style={{
+                          background: "rgba(10,25,47,0.95)",
+                          border: "1px solid rgba(100,255,218,0.4)",
+                          color: "#64FFDA",
+                        }}
+                      >
+                        {center.name}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              ))}
+            </motion.div>
+
+            {/* Center list */}
+            <div className="space-y-3">
+              {CAMPUS_CENTERS.map((c, i) => (
+                <motion.div
+                  key={c.id}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors"
+                  style={{
+                    background: hoveredCenter === c.id ? "rgba(100,255,218,0.08)" : "rgba(10,25,47,0.6)",
+                    borderColor: hoveredCenter === c.id ? "rgba(100,255,218,0.4)" : "rgba(100,255,218,0.1)",
+                  }}
+                  onMouseEnter={() => setHoveredCenter(c.id)}
+                  onMouseLeave={() => setHoveredCenter(null)}
+                >
+                  <MapPin size={16} className={c.active ? "text-primary" : "text-muted-foreground"} />
+                  <span className="text-sm font-medium text-foreground flex-1">{c.name}</span>
+                  <span
+                    className="text-xs font-mono px-2 py-0.5 rounded-full"
+                    style={{
+                      background: c.active ? "rgba(100,255,218,0.1)" : "rgba(100,100,100,0.1)",
+                      color: c.active ? "#64FFDA" : "#666",
+                      border: `1px solid ${c.active ? "rgba(100,255,218,0.3)" : "rgba(100,100,100,0.2)"}`,
+                    }}
+                  >
+                    {c.active ? "ONLINE" : "OFFLINE"}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* News & Updates */}
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center justify-between mb-12"
+          >
+            <div>
+              <h2 className="text-4xl font-bold text-white mb-2">News & Updates</h2>
+              <p className="text-muted-foreground">Latest from Unique Open University</p>
+            </div>
+            <Zap className="text-primary" size={32} />
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {NEWS.map((item, i) => (
+              <motion.article
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -4, borderColor: "rgba(100,255,218,0.4)" }}
+                className="p-6 rounded-2xl border cursor-pointer group transition-colors"
+                style={{ background: "rgba(10,25,47,0.6)", borderColor: "rgba(100,255,218,0.15)", backdropFilter: "blur(12px)" }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+                    style={{ background: "rgba(100,255,218,0.1)", color: "#64FFDA" }}
+                  >
+                    {item.category}
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono">{item.date}</span>
+                </div>
+                <h3 className="text-base font-semibold text-white group-hover:text-primary transition-colors leading-snug">
+                  {item.title}
+                </h3>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-2xl mx-auto"
+        >
+          <h2 className="text-4xl font-bold text-white mb-4">Ready to enter the system?</h2>
+          <p className="text-muted-foreground mb-8 text-lg">Your institutional operating system is online and waiting.</p>
           <Link href="/login">
-            <Button size="lg" className="w-40 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(100,255,218,0.2)]">
-              Begin Session
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button variant="outline" size="lg" className="w-40 border-primary/50 text-primary hover:bg-primary/10">
-              Initialize
+            <Button
+              size="lg"
+              className="h-14 px-12 text-lg font-bold"
+              style={{ background: "#64FFDA", color: "#050D1A", boxShadow: "0 0 50px rgba(100,255,218,0.4)" }}
+            >
+              Begin Session →
             </Button>
           </Link>
         </motion.div>
-      </main>
+      </section>
     </div>
   );
 }

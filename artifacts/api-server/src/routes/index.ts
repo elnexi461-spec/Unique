@@ -11,6 +11,12 @@ import dashboardRouter from "./dashboard";
 import verificationRouter from "./verification";
 import adminRouter from "./admin";
 import openaiChatRouter from "./openai-chat";
+import gradesRouter from "./grades";
+import attendanceRouter from "./attendance";
+import timetableRouter from "./timetable";
+import announcementsRouter from "./announcements";
+import systemRouter from "./system";
+import importRouter from "./import";
 
 const router: IRouter = Router();
 
@@ -26,5 +32,11 @@ router.use(dashboardRouter);
 router.use(verificationRouter);
 router.use(adminRouter);
 router.use(openaiChatRouter);
+router.use(gradesRouter);
+router.use(attendanceRouter);
+router.use(timetableRouter);
+router.use(announcementsRouter);
+router.use(systemRouter);
+router.use(importRouter);
 
 export default router;
