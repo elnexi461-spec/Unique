@@ -598,7 +598,7 @@ export default function FounderPage() {
   const [scoutCampus, setScoutCampus] = useState<"All" | "Zaria" | "Lagos" | "Kano">("All");
 
   /* Registry state */
-  const [provision, setProvision] = useState({ name: "", email: "", role: "student", campus: "Zaria" });
+  const [provision, setProvision] = useState({ name: "", email: "", role: "student", campus: "Zaria", major: "", year: "Year 1" });
   const [provisioning,    setProvisioning]   = useState(false);
   const [provisionResult, setProvisionResult]= useState<ProvisionResult | null>(null);
   const [showModal,       setShowModal]      = useState(false);
@@ -693,7 +693,7 @@ export default function FounderPage() {
       if (r.ok && data.success) {
         setProvisionResult(data as ProvisionResult);
         setShowModal(true);
-        setProvision({ name: "", email: "", role: "student", campus: "Zaria" });
+        setProvision({ name: "", email: "", role: "student", campus: "Zaria", major: "", year: "Year 1" });
         toast({ title: "User provisioned", description: `${data.user.name} — ${data.user.role}` });
       } else {
         toast({ title: "Provisioning failed", description: data.error, variant: "destructive" });
@@ -1102,6 +1102,42 @@ export default function FounderPage() {
                       onChange={e => setProvision(p => ({ ...p, email: e.target.value }))}
                       style={{ background: "rgba(8,18,50,0.6)", borderColor: "rgba(59,130,246,0.2)", color: "white" }}
                     />
+                  </div>
+
+                  {/* Major — only relevant for students */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Major / Department
+                    </Label>
+                    <Input
+                      placeholder="e.g. Business & Entrepreneurship"
+                      value={provision.major}
+                      onChange={e => setProvision(p => ({ ...p, major: e.target.value }))}
+                      style={{ background: "rgba(8,18,50,0.6)", borderColor: "rgba(59,130,246,0.2)", color: "white" }}
+                    />
+                  </div>
+
+                  {/* Year of study */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Year of Study
+                    </Label>
+                    <div className="flex gap-2">
+                      {["Year 1", "Year 2", "Year 3", "Year 4"].map(yr => (
+                        <button
+                          key={yr}
+                          onClick={() => setProvision(p => ({ ...p, year: yr }))}
+                          className="flex-1 py-2 rounded-lg border text-xs font-semibold transition-all"
+                          style={{
+                            background:  provision.year === yr ? "rgba(59,130,246,0.18)" : "rgba(8,18,50,0.5)",
+                            borderColor: provision.year === yr ? "rgba(59,130,246,0.5)"  : "rgba(59,130,246,0.12)",
+                            color:       provision.year === yr ? BRAND.electric           : "rgba(148,163,184,0.6)",
+                          }}
+                        >
+                          {yr.replace("Year ", "Y")}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">

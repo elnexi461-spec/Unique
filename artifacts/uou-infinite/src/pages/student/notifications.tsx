@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Bell, CheckCheck, Zap, Award, BookOpen, AlertTriangle, Info, X } from "lucide-react";
 import { useLocation } from "wouter";
+import { PageTransition } from "@/components/PageTransition";
 
 interface Notification {
   id: number;
@@ -25,12 +26,13 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
   { id: 10, type: "ai",          title: "Sentinel Insight: Study Pattern",     body: "Your peak performance window is Tuesday–Thursday 9AM–12PM. Scheduling assessments in this window increases your pass rate by an estimated 18%.", time: "1 week ago",      read: true  },
 ];
 
+// All types use Electric Blue palette — no purple/teal
 const TYPE_CONFIG = {
   achievement: { icon: Award,         color: "#F59E0B", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.25)"  },
   urgent:      { icon: AlertTriangle, color: "#F87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.25)" },
-  info:        { icon: Info,          color: "#0070FF", bg: "rgba(0,112,255,0.06)",   border: "rgba(0,112,255,0.18)"   },
+  info:        { icon: Info,          color: "#0070FF", bg: "rgba(0,112,255,0.07)",   border: "rgba(0,112,255,0.2)"    },
   ai:          { icon: Zap,           color: "#34D399", bg: "rgba(52,211,153,0.07)",  border: "rgba(52,211,153,0.22)"  },
-  course:      { icon: BookOpen,      color: "#A78BFA", bg: "rgba(167,139,250,0.07)", border: "rgba(167,139,250,0.22)" },
+  course:      { icon: BookOpen,      color: "#0070FF", bg: "rgba(0,112,255,0.07)",   border: "rgba(0,112,255,0.2)"    },
 };
 
 export default function Notifications() {
@@ -39,122 +41,132 @@ export default function Notifications() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
   const unreadCount = notifications.filter(n => !n.read).length;
-  const displayed = filter === "unread" ? notifications.filter(n => !n.read) : notifications;
+  const displayed   = filter === "unread" ? notifications.filter(n => !n.read) : notifications;
 
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  const dismiss = (id: number) => setNotifications(prev => prev.filter(n => n.id !== id));
-  const markRead = (id: number) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const dismiss     = (id: number) => setNotifications(prev => prev.filter(n => n.id !== id));
+  const markRead    = (id: number) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
 
   return (
-    <div className="space-y-6 pb-8">
-      <div className="flex items-center gap-4">
-        <motion.button
-          whileHover={{ x: -2, scale: 1.02 }} whileTap={{ scale: 0.97 }}
-          onClick={() => setLocation("/student")}
-          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl border"
-          style={{ background: "rgba(4,11,26,0.6)", borderColor: "rgba(0,112,255,0.25)", color: "rgba(100,160,255,0.9)", backdropFilter: "blur(12px)" }}
-        >
-          <ArrowLeft size={14} /> Back to Portal
-        </motion.button>
-      </div>
-
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center border relative"
-              style={{ background: "rgba(0,112,255,0.1)", borderColor: "rgba(0,112,255,0.3)" }}>
-              <Bell size={18} style={{ color: "#0070FF" }} />
-              {unreadCount > 0 && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black"
-                  style={{ background: "#F87171", color: "white" }}>
-                  {unreadCount}
-                </div>
-              )}
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">Notifications</h1>
-              <p className="text-muted-foreground text-sm">{unreadCount} unread · {notifications.length} total</p>
-            </div>
-          </div>
+    <PageTransition>
+      <div className="space-y-6 pb-8">
+        <div className="flex items-center gap-4">
           <motion.button
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            onClick={markAllRead}
-            className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border"
-            style={{ background: "rgba(0,112,255,0.08)", borderColor: "rgba(0,112,255,0.25)", color: "#0070FF" }}
+            whileHover={{ x: -2, scale: 1.02 }} whileTap={{ scale: 0.97 }}
+            onClick={() => setLocation("/student")}
+            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl border"
+            style={{ background: "rgba(4,11,26,0.6)", borderColor: "rgba(0,112,255,0.25)", color: "rgba(100,160,255,0.9)", backdropFilter: "blur(12px)" }}
           >
-            <CheckCheck size={13} /> Mark all read
+            <ArrowLeft size={14} /> Back to Portal
           </motion.button>
         </div>
-      </motion.div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2">
-        {(["all", "unread"] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold border capitalize transition-all"
-            style={{
-              background: filter === f ? "rgba(0,112,255,0.15)" : "transparent",
-              borderColor: filter === f ? "rgba(0,112,255,0.4)" : "rgba(255,255,255,0.08)",
-              color: filter === f ? "#0070FF" : "rgba(148,163,184,0.7)",
-            }}>
-            {f} {f === "unread" && unreadCount > 0 && `(${unreadCount})`}
-          </button>
-        ))}
-      </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center border relative"
+                style={{ background: "rgba(0,112,255,0.1)", borderColor: "rgba(0,112,255,0.3)" }}>
+                <Bell size={18} style={{ color: "#0070FF" }} />
+                {unreadCount > 0 && (
+                  <motion.div
+                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black"
+                    style={{ background: "#F87171", color: "white" }}>
+                    {unreadCount}
+                  </motion.div>
+                )}
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">Notifications</h1>
+                <p className="text-muted-foreground text-sm">{unreadCount} unread · {notifications.length} total</p>
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              onClick={markAllRead}
+              className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg border"
+              style={{ background: "rgba(0,112,255,0.08)", borderColor: "rgba(0,112,255,0.25)", color: "#0070FF" }}
+            >
+              <CheckCheck size={13} /> Mark all read
+            </motion.button>
+          </div>
+        </motion.div>
 
-      {/* Notification list */}
-      <div className="space-y-3">
-        <AnimatePresence>
-          {displayed.length === 0 ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="text-center py-20 text-muted-foreground">
-              <Bell size={32} className="mx-auto mb-3 opacity-20" />
-              <p className="text-sm">No unread notifications</p>
-            </motion.div>
-          ) : (
-            displayed.map((n, i) => {
-              const cfg = TYPE_CONFIG[n.type];
-              const Icon = cfg.icon;
-              return (
-                <motion.div
-                  key={n.id}
-                  layout
-                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: 40, height: 0 }}
-                  transition={{ delay: i * 0.04, duration: 0.35 }}
-                  className="rounded-2xl border p-4 relative overflow-hidden cursor-pointer group"
-                  style={{
-                    background: n.read ? "rgba(4,11,26,0.55)" : cfg.bg,
-                    borderColor: n.read ? "rgba(0,112,255,0.1)" : cfg.border,
-                    opacity: n.read ? 0.75 : 1,
-                  }}
-                  onClick={() => markRead(n.id)}
-                >
-                  {!n.read && (
-                    <div className="absolute top-4 right-10 w-2 h-2 rounded-full"
-                      style={{ background: cfg.color, boxShadow: `0 0 6px ${cfg.color}` }} />
-                  )}
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
-                      style={{ background: `${cfg.color}15`, borderColor: `${cfg.color}30` }}>
-                      <Icon size={14} style={{ color: cfg.color }} />
+        {/* Filter tabs */}
+        <div className="flex gap-2">
+          {(["all", "unread"] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold border capitalize transition-all"
+              style={{
+                background:  filter === f ? "rgba(0,112,255,0.15)" : "transparent",
+                borderColor: filter === f ? "rgba(0,112,255,0.4)"  : "rgba(255,255,255,0.08)",
+                color:       filter === f ? "#0070FF"               : "rgba(148,163,184,0.7)",
+              }}>
+              {f} {f === "unread" && unreadCount > 0 && `(${unreadCount})`}
+            </button>
+          ))}
+        </div>
+
+        {/* Notification list */}
+        <div className="space-y-3">
+          <AnimatePresence>
+            {displayed.length === 0 ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="text-center py-20 text-muted-foreground">
+                <Bell size={32} className="mx-auto mb-3 opacity-20" />
+                <p className="text-sm">No unread notifications</p>
+              </motion.div>
+            ) : (
+              displayed.map((n, i) => {
+                const cfg  = TYPE_CONFIG[n.type];
+                const Icon = cfg.icon;
+                return (
+                  <motion.div
+                    key={n.id}
+                    layout
+                    initial={{ opacity: 0, y: 12, filter: "blur(3px)" }}
+                    animate={{ opacity: 1, y: 0,  filter: "blur(0px)" }}
+                    exit={{ opacity: 0, x: 40, height: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                    className="rounded-2xl border p-4 relative overflow-hidden cursor-pointer group"
+                    style={{
+                      background:  n.read ? "rgba(4,11,26,0.55)" : cfg.bg,
+                      borderColor: n.read ? "rgba(0,112,255,0.1)"  : cfg.border,
+                      opacity:     n.read ? 0.75 : 1,
+                    }}
+                    onClick={() => markRead(n.id)}
+                  >
+                    {/* Unread pulse dot */}
+                    {!n.read && (
+                      <motion.div
+                        animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute top-4 right-10 w-2 h-2 rounded-full"
+                        style={{ background: cfg.color, boxShadow: `0 0 8px ${cfg.color}` }}
+                      />
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
+                        style={{ background: `${cfg.color}15`, borderColor: `${cfg.color}30` }}>
+                        <Icon size={14} style={{ color: cfg.color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground mb-0.5">{n.title}</div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{n.body}</p>
+                        <div className="text-[10px] font-mono text-muted-foreground/50 mt-2">{n.time}</div>
+                      </div>
+                      <button onClick={e => { e.stopPropagation(); dismiss(n.id); }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-white p-1 shrink-0">
+                        <X size={12} />
+                      </button>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-foreground mb-0.5">{n.title}</div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{n.body}</p>
-                      <div className="text-[10px] font-mono text-muted-foreground/50 mt-2">{n.time}</div>
-                    </div>
-                    <button onClick={e => { e.stopPropagation(); dismiss(n.id); }}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-white p-1">
-                      <X size={12} />
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })
-          )}
-        </AnimatePresence>
+                  </motion.div>
+                );
+              })
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { SentinelPlayer } from "@/components/SentinelPlayer";
 import { QuizGateway } from "@/components/QuizGateway";
 import { GoldCard } from "@/components/GoldCard";
 import { RemedialBridge } from "@/components/RemedialBridge";
-import { ArrowLeft, Shield, Brain, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Brain, ChevronRight, AlertTriangle, Heart } from "lucide-react";
 import { useListCourses } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -34,6 +34,97 @@ function saveToVault(userId: string | number, entry: {
   }
 }
 
+/** Reads the mock fee ledger and returns true if any payment is overdue */
+function useFeeClearanceStatus(userId: string): { overdue: boolean; overdueAmount: number } {
+  const [status, setStatus] = useState({ overdue: false, overdueAmount: 0 });
+
+  useEffect(() => {
+    // Check localStorage for paid fees
+    const paidKey = `uou_fees_paid_${userId}`;
+    const paid: string[] = JSON.parse(localStorage.getItem(paidKey) || "[]");
+
+    // Pending fees from the mock ledger
+    const pendingFees = [
+      { ref: "UOU-PAY-2026-0488", amount: 85000, due: "May 15, 2026", overdue: true },
+      { ref: "UOU-PAY-2026-0489", amount:  7500, due: "May 20, 2026", overdue: false },
+    ];
+
+    const overdueFees = pendingFees.filter(f => f.overdue && !paid.includes(f.ref));
+    const total = overdueFees.reduce((s, f) => s + f.amount, 0);
+    setStatus({ overdue: overdueFees.length > 0, overdueAmount: total });
+  }, [userId]);
+
+  return status;
+}
+
+function FeeWarningBanner({ amount }: { amount: number }) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -12, scaleY: 0.85 }}
+        animate={{ opacity: 1, y: 0, scaleY: 1 }}
+        exit={{ opacity: 0, y: -8, scaleY: 0.9 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-2xl border overflow-hidden relative"
+        style={{ background: "rgba(2,8,20,0.92)", borderColor: "rgba(245,158,11,0.35)" }}
+      >
+        {/* Subtle gold pulse gradient */}
+        <motion.div
+          animate={{ opacity: [0.06, 0.16, 0.06] }}
+          transition={{ duration: 2.8, repeat: Infinity }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.18) 0%, transparent 60%)" }}
+        />
+
+        {/* Top stripe */}
+        <div className="h-0.5 w-full"
+          style={{ background: "linear-gradient(90deg, rgba(245,158,11,0), #F59E0B, rgba(245,158,11,0))" }} />
+
+        <div className="px-5 py-3 relative z-10 flex items-start gap-4">
+          {/* Heartbeat icon */}
+          <div className="shrink-0 mt-0.5">
+            <motion.div
+              animate={{ scale: [1, 1.25, 1], opacity: [0.8, 1, 0.8] }}
+              transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Heart size={16} style={{ color: "#F59E0B" }} fill="rgba(245,158,11,0.25)" />
+            </motion.div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: "#F59E0B" }}>
+                Financial Clearance Pending
+              </span>
+              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded"
+                style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" }}>
+                ₦{amount.toLocaleString()} OUTSTANDING
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Lecture access granted via{" "}
+              <span className="font-semibold" style={{ color: "#F59E0B" }}>Founder's Grace Period</span>
+              {" "}— the institution believes no scholar should be denied knowledge due to financial constraints.
+              Please clear your balance at your earliest convenience.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setDismissed(true)}
+            className="shrink-0 p-1 text-muted-foreground hover:text-white transition-colors mt-0.5"
+          >
+            <ChevronRight size={14} className="rotate-[-90deg]" />
+          </button>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default function StudentLecture() {
   const { courseId } = useParams<{ courseId: string }>();
   const [, setLocation] = useLocation();
@@ -47,7 +138,9 @@ export default function StudentLecture() {
 
   const courseTitle = course?.title || "Principles of Entrepreneurship";
   const studentName = user?.name || "Scholar";
-  const studentId = String(user?.id || "stu-001");
+  const studentId   = String(user?.id || "stu-001");
+
+  const { overdue, overdueAmount } = useFeeClearanceStatus(studentId);
 
   const handleLectureEnd = () => {
     setPhase("portal_zoom");
@@ -55,14 +148,13 @@ export default function StudentLecture() {
   };
 
   const handleQuizPass = (score: number, grade: string, privateKey: string) => {
-    const entry = {
+    saveToVault(studentId, {
       courseName: courseTitle,
       grade,
       score,
       privateKey,
       mintedAt: new Date().toISOString(),
-    };
-    saveToVault(studentId, entry);
+    });
     setGoldCardData({ score, grade, privateKey });
     setPhase("gold_card");
   };
@@ -83,15 +175,15 @@ export default function StudentLecture() {
 
   const handleGoldCardDismiss = () => setPhase("complete");
 
-  const STEPS = ["Recall", "Lecture", "Assessment", "Gold Card"];
+  const STEPS  = ["Recall", "Lecture", "Assessment", "Gold Card"];
   const stepIdx =
     phase === "recall" ? 0 :
     phase === "lecture" || phase === "portal_zoom" ? 1 :
     phase === "quiz" || phase === "remedial" ? 2 : 3;
 
   return (
-    <div className="space-y-6">
-      {/* Nav — glassmorphism back button + breadcrumb */}
+    <div className="space-y-4">
+      {/* Nav */}
       <div className="flex items-center gap-4 flex-wrap">
         <motion.button
           whileHover={{ x: -2, scale: 1.02 }}
@@ -99,11 +191,11 @@ export default function StudentLecture() {
           onClick={() => setLocation("/student/timetable")}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl border transition-all"
           style={{
-            background: "rgba(4,11,26,0.6)",
-            borderColor: "rgba(0,112,255,0.25)",
-            color: "rgba(100,160,255,0.9)",
-            backdropFilter: "blur(12px)",
-            boxShadow: "0 2px 12px rgba(0,112,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
+            background:    "rgba(4,11,26,0.6)",
+            borderColor:   "rgba(0,112,255,0.25)",
+            color:         "rgba(100,160,255,0.9)",
+            backdropFilter:"blur(12px)",
+            boxShadow:     "0 2px 12px rgba(0,112,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
           <ArrowLeft size={14} /> Back to Timetable
@@ -112,7 +204,7 @@ export default function StudentLecture() {
           {STEPS.map((step, i) => (
             <span key={step} className="flex items-center gap-1">
               <span style={{
-                color: i === stepIdx ? "#0070FF" : i < stepIdx ? "#60A5FA" : undefined,
+                color:      i === stepIdx ? "#0070FF" : i < stepIdx ? "#60A5FA" : undefined,
                 fontWeight: i === stepIdx ? 700 : undefined,
               }}>{step}</span>
               {i < STEPS.length - 1 && <ChevronRight size={10} className="opacity-30" />}
@@ -120,6 +212,9 @@ export default function StudentLecture() {
           ))}
         </div>
       </div>
+
+      {/* Fee clearance banner — shown only if overdue */}
+      {overdue && <FeeWarningBanner amount={overdueAmount} />}
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         <div>
@@ -199,7 +294,7 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* LECTURE — Sentinel Player */}
+          {/* LECTURE */}
           {phase === "lecture" && (
             <motion.div key="lecture"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -225,7 +320,7 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* PORTAL ZOOM transition */}
+          {/* PORTAL ZOOM */}
           {phase === "portal_zoom" && (
             <motion.div
               key="portal_zoom"
