@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { LectureImageSlider } from "@/components/LectureImageSlider";
+import { SentinelPlayer } from "@/components/SentinelPlayer";
 import { QuizGateway } from "@/components/QuizGateway";
 import { GoldCard } from "@/components/GoldCard";
 import { RemedialBridge } from "@/components/RemedialBridge";
@@ -10,7 +10,7 @@ import { Link } from "wouter";
 import { useListCourses } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth-context";
 
-type Phase = "recall" | "lecture" | "quiz" | "remedial" | "gold_card" | "complete";
+type Phase = "recall" | "lecture" | "portal_zoom" | "quiz" | "remedial" | "gold_card" | "complete";
 
 interface GoldCardData {
   score: number;
@@ -25,7 +25,6 @@ export default function StudentLecture() {
   const course = courses?.find(c => String(c.id) === courseId);
 
   const [phase, setPhase] = useState<Phase>("recall");
-  const [lectureComplete, setLectureComplete] = useState(false);
   const [attempt, setAttempt] = useState(1);
   const [goldCardData, setGoldCardData] = useState<GoldCardData | null>(null);
 
@@ -33,8 +32,11 @@ export default function StudentLecture() {
   const studentName = user?.name || "Scholar";
   const studentId = String(user?.id || "stu-001");
 
-  const handleLectureEnd = () => setLectureComplete(true);
-  const handleStartQuiz = () => setPhase("quiz");
+  /* When the Sentinel Player finishes, show portal zoom then quiz */
+  const handleLectureEnd = () => {
+    setPhase("portal_zoom");
+    setTimeout(() => setPhase("quiz"), 1600);
+  };
 
   const handleQuizPass = (score: number, grade: string, privateKey: string) => {
     setGoldCardData({ score, grade, privateKey });
@@ -47,7 +49,6 @@ export default function StudentLecture() {
     } else {
       setAttempt(failedAttempt + 1);
       setPhase("lecture");
-      setLectureComplete(false);
     }
   };
 
@@ -61,7 +62,7 @@ export default function StudentLecture() {
   const STEPS = ["Recall", "Lecture", "Assessment", "Gold Card"];
   const stepIdx =
     phase === "recall" ? 0 :
-    phase === "lecture" ? 1 :
+    phase === "lecture" || phase === "portal_zoom" ? 1 :
     phase === "quiz" || phase === "remedial" ? 2 : 3;
 
   return (
@@ -91,7 +92,7 @@ export default function StudentLecture() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{courseTitle}</h1>
           <p className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
             <Shield size={14} className="text-primary" />
-            Neural Ledger active · Progressive slide lecture · Attempt {attempt}/3
+            Neural Ledger active · Sentinel Lecture Engine · Attempt {attempt}/3
           </p>
         </div>
 
@@ -164,7 +165,7 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* LECTURE — Image Slider */}
+          {/* LECTURE — Sentinel Player */}
           {phase === "lecture" && (
             <motion.div key="lecture"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -176,30 +177,47 @@ export default function StudentLecture() {
                 <div>
                   <div className="font-semibold text-primary">Academic Integrity Notice</div>
                   <p className="text-muted-foreground text-xs leading-relaxed mt-0.5">
-                    Sequential slide progression enforced — forward-skipping is disabled. Complete all slides to unlock the Assessment Gateway.
+                    Sentinel Lecture Engine active — slides auto-advance sequentially.
+                    The Assessment Gateway will unlock automatically when the lecture completes.
                     {attempt > 1 && <span className="text-yellow-400 font-semibold"> · Retry attempt {attempt}/3.</span>}
                   </p>
                 </div>
               </div>
-              <LectureImageSlider
+              <SentinelPlayer
                 courseTitle={courseTitle}
                 courseId={parseInt(courseId || "1")}
-                onLectureComplete={handleLectureEnd}
+                onEnded={handleLectureEnd}
               />
-              <AnimatePresence>
-                {lectureComplete && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.4 }}>
-                    <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                      onClick={handleStartQuiz}
-                      className="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2"
-                      style={{ background: "linear-gradient(135deg, #0F4C8C, #1D4ED8, #3B82F6)", color: "white" }}
-                      animate={{ boxShadow: ["0 0 20px rgba(59,130,246,0.4)", "0 0 40px rgba(59,130,246,0.7)", "0 0 20px rgba(59,130,246,0.4)"] }}
-                      transition={{ duration: 2, repeat: Infinity }}>
-                      <Brain size={18} /> Enter Assessment Gateway <ChevronRight size={16} />
-                    </motion.button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            </motion.div>
+          )}
+
+          {/* PORTAL ZOOM transition */}
+          {phase === "portal_zoom" && (
+            <motion.div
+              key="portal_zoom"
+              className="fixed inset-0 z-[500] flex items-center justify-center overflow-hidden"
+              style={{ background: "rgba(2,6,23,0.97)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {/* Expanding ring */}
+              <motion.div
+                className="rounded-full"
+                style={{ background: "radial-gradient(circle, #1D4ED8 0%, #3B82F6 40%, rgba(96,165,250,0.3) 70%, transparent 100%)" }}
+                initial={{ width: 0, height: 0, opacity: 1 }}
+                animate={{ width: "250vmax", height: "250vmax", opacity: [1, 1, 0] }}
+                transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+              />
+              <motion.div
+                className="absolute font-black tracking-[0.25em] uppercase"
+                style={{ color: "white", fontSize: "clamp(1rem, 3vw, 1.5rem)" }}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: [0, 1, 1, 0], scale: [0.85, 1, 1, 0.95] }}
+                transition={{ duration: 1.4, times: [0, 0.25, 0.7, 1] }}
+              >
+                Assessment Gateway
+              </motion.div>
             </motion.div>
           )}
 

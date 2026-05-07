@@ -9,7 +9,7 @@ import {
   Users, BookOpen, GraduationCap, AlertTriangle, Activity, Zap, RefreshCw,
   Upload, Megaphone, Loader2, CheckCircle, Radio, Shield, TrendingUp,
   TrendingDown, Award, MapPin, Brain, Star, Database, UserPlus, Copy, X,
-  Search, Trophy, Lock,
+  Search, Trophy, Lock, FileText, Clock, Filter,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip,
@@ -18,7 +18,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { FRIDAY_BRIEF_WEEK18, MOCK_STUDENTS } from "@/data/mockDatabase";
+import { FRIDAY_BRIEF_WEEK18, MOCK_STUDENTS, getAuditLog } from "@/data/mockDatabase";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -422,6 +422,151 @@ function ProvisionModal({ result, onClose }: { result: ProvisionResult; onClose:
   );
 }
 
+/* ── Audit Log Section ──────────────────────────────────────────────────────── */
+function AuditLogSection() {
+  const [filterResult, setFilterResult] = useState<"all" | "pass" | "fail">("all");
+  const entries = getAuditLog();
+  const filtered = filterResult === "all" ? entries : entries.filter(e => e.result === filterResult);
+
+  const passCount = entries.filter(e => e.result === "pass").length;
+  const failCount = entries.filter(e => e.result === "fail").length;
+  const avgScore = entries.length > 0
+    ? Math.round(entries.reduce((s, e) => s + e.score, 0) / entries.length)
+    : 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Stats row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: "Total Submissions", value: entries.length, color: "#60A5FA" },
+          { label: "Passed", value: passCount, color: "#10B981" },
+          { label: "Failed", value: failCount, color: "#EF4444" },
+          { label: "Avg Score", value: entries.length ? `${avgScore}%` : "—", color: "#F59E0B" },
+        ].map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.06 }}
+            className="rounded-xl border p-4"
+            style={{ background: "rgba(8,16,50,0.8)", borderColor: "rgba(59,130,246,0.15)" }}
+          >
+            <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">{s.label}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Filter bar */}
+      <div
+        className="rounded-xl border p-4 flex items-center gap-3"
+        style={{ background: "rgba(8,16,50,0.7)", borderColor: "rgba(59,130,246,0.15)" }}
+      >
+        <Filter size={13} className="text-muted-foreground shrink-0" />
+        <span className="text-xs text-muted-foreground uppercase tracking-widest">Filter:</span>
+        {(["all", "pass", "fail"] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setFilterResult(f)}
+            className="px-3 py-1 rounded-lg text-xs font-semibold transition-all border capitalize"
+            style={{
+              background: filterResult === f ? "rgba(59,130,246,0.18)" : "transparent",
+              borderColor: filterResult === f ? "rgba(59,130,246,0.4)" : "rgba(255,255,255,0.08)",
+              color: filterResult === f ? "#93C5FD" : "rgba(148,163,184,0.7)",
+            }}
+          >
+            {f}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-muted-foreground font-mono">{filtered.length} entries</span>
+      </div>
+
+      {/* Log table */}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{ background: "rgba(4,10,36,0.9)", borderColor: "rgba(59,130,246,0.18)" }}
+      >
+        <div
+          className="grid text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground px-4 py-2.5 border-b"
+          style={{ borderColor: "rgba(59,130,246,0.12)", gridTemplateColumns: "1fr 1.4fr 1.2fr 0.6fr 0.7fr 0.7fr 0.7fr" }}
+        >
+          <span>Timestamp</span>
+          <span>Student</span>
+          <span>Course</span>
+          <span>Attempt</span>
+          <span>Score</span>
+          <span>Time</span>
+          <span>Result</span>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <FileText size={32} className="mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-muted-foreground text-sm">No audit entries yet.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              Entries appear when students submit the Knowledge Gateway assessment.
+            </p>
+          </div>
+        ) : (
+          <div className="max-h-[520px] overflow-y-auto divide-y" style={{ divideColor: "rgba(59,130,246,0.08)" }}>
+            {filtered.map((entry, i) => {
+              const ts = new Date(entry.timestamp);
+              const timeStr = ts.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+              const dateStr = ts.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+              const mins = Math.floor(entry.timeTaken / 60);
+              const secs = entry.timeTaken % 60;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.025 }}
+                  className="grid items-center px-4 py-3 text-xs hover:bg-white/[0.02] transition-colors"
+                  style={{ gridTemplateColumns: "1fr 1.4fr 1.2fr 0.6fr 0.7fr 0.7fr 0.7fr" }}
+                >
+                  <span className="text-muted-foreground font-mono">
+                    <span className="block">{dateStr}</span>
+                    <span className="opacity-60">{timeStr}</span>
+                  </span>
+                  <span>
+                    <span className="font-semibold text-foreground block truncate">{entry.studentName}</span>
+                    <span className="text-muted-foreground/60 font-mono text-[9px]">{entry.studentId}</span>
+                  </span>
+                  <span className="text-muted-foreground truncate">{entry.courseTitle}</span>
+                  <span className="text-muted-foreground font-mono">{entry.attempt}/3</span>
+                  <span
+                    className="font-bold font-mono"
+                    style={{ color: entry.score >= 70 ? "#10B981" : "#EF4444" }}
+                  >
+                    {entry.score}%
+                  </span>
+                  <span className="text-muted-foreground font-mono flex items-center gap-1">
+                    <Clock size={9} />
+                    {mins > 0 ? `${mins}m ` : ""}{secs}s
+                  </span>
+                  <span>
+                    <span
+                      className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide"
+                      style={{
+                        background: entry.result === "pass" ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.12)",
+                        color: entry.result === "pass" ? "#10B981" : "#EF4444",
+                        border: `1px solid ${entry.result === "pass" ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.25)"}`,
+                      }}
+                    >
+                      {entry.result}
+                    </span>
+                  </span>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────────── */
 export default function FounderPage() {
   const { data: overview }          = useGetDashboardOverview();
@@ -432,7 +577,7 @@ export default function FounderPage() {
   const { token }                   = useAuth();
   const { toast }                   = useToast();
 
-  const [activeTab, setActiveTab] = useState<"brief" | "analytics" | "scout" | "registry" | "controls">("brief");
+  const [activeTab, setActiveTab] = useState<"brief" | "analytics" | "scout" | "registry" | "controls" | "audit">("brief");
 
   /* Controls state */
   const [redSwitchActive, setRedSwitchActive] = useState(false);
@@ -582,6 +727,7 @@ export default function FounderPage() {
     { id: "scout",    label: "Talent Scout", icon: Search },
     { id: "registry", label: "Registry",    icon: UserPlus },
     { id: "controls", label: "Controls",    icon: Shield },
+    { id: "audit",    label: "Audit Log",   icon: FileText },
   ] as const;
 
   return (
@@ -1221,6 +1367,17 @@ export default function FounderPage() {
                 )}
               </CardContent>
             </Card>
+          </motion.div>
+        )}
+
+        {/* ── AUDIT LOG ── */}
+        {activeTab === "audit" && (
+          <motion.div key="audit"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.35 }}
+            className="space-y-4">
+
+            <AuditLogSection />
           </motion.div>
         )}
 

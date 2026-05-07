@@ -409,6 +409,49 @@ export const FRIDAY_BRIEF_WEEK18 = {
   founderMessage: "The data from Week 18 validates our hypothesis: when the Sentinel personalises the academic experience, outcomes improve without increasing staff load. Zaria's 15% punctuality surge came from one algorithmic timetable adjustment — no additional human intervention. This is what institutional intelligence looks like at scale. Continue.",
 };
 
+/* ═══════════════════════════════════════════════════════
+   Founder Audit Log — quiz submission records
+   ═══════════════════════════════════════════════════════ */
+
+export interface AuditEntry {
+  studentId: string;
+  studentName: string;
+  courseTitle: string;
+  timestamp: string;
+  timeTaken: number;
+  result: "pass" | "fail";
+  score: number;
+  attempt: number;
+}
+
+export const AUDIT_LOG: AuditEntry[] = [];
+
+export function pushAuditEntry(entry: AuditEntry): void {
+  AUDIT_LOG.unshift(entry);
+  if (AUDIT_LOG.length > 500) AUDIT_LOG.pop();
+  try {
+    const stored: AuditEntry[] = JSON.parse(localStorage.getItem("uou_audit_log") ?? "[]");
+    stored.unshift(entry);
+    localStorage.setItem("uou_audit_log", JSON.stringify(stored.slice(0, 500)));
+  } catch {
+    /* silently ignore storage errors */
+  }
+}
+
+export function getAuditLog(): AuditEntry[] {
+  try {
+    const stored: AuditEntry[] = JSON.parse(localStorage.getItem("uou_audit_log") ?? "[]");
+    for (const e of AUDIT_LOG) {
+      if (!stored.find(s => s.timestamp === e.timestamp && s.studentId === e.studentId)) {
+        stored.unshift(e);
+      }
+    }
+    return stored.slice(0, 500);
+  } catch {
+    return [...AUDIT_LOG];
+  }
+}
+
 /* 200+ minted Gold Cards history for Identity Vault */
 export const GOLD_CARD_HISTORY = Array.from({ length: 217 }, (_, i) => {
   const student = MOCK_STUDENTS[i % MOCK_STUDENTS.length]!;

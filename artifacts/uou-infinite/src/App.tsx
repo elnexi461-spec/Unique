@@ -10,6 +10,7 @@ import { SentinelChat } from "@/components/sentinel-chat";
 import { AnnouncementTicker } from "@/components/AnnouncementTicker";
 import { SentinelPulse } from "@/components/SentinelPulse";
 import { SocialProofTicker } from "@/components/SocialProofTicker";
+import { NewsTicker } from "@/components/NewsTicker";
 import { useState } from "react";
 
 import NotFound from "@/pages/not-found";
@@ -24,6 +25,7 @@ import LecturersList from "@/pages/coordinator/lecturers";
 import CourseCatalog from "@/pages/coordinator/courses";
 import AdmissionsPage from "@/pages/coordinator/admissions";
 import CoordinatorTimetable from "@/pages/coordinator/timetable";
+import CoordinatorUpload from "@/pages/coordinator/upload";
 
 import LecturerPortal from "@/pages/lecturer/portal";
 import LecturerGrades from "@/pages/lecturer/grades";
@@ -56,6 +58,7 @@ function Router() {
         <Route path="/coordinator/courses" component={CourseCatalog} />
         <Route path="/coordinator/admissions" component={AdmissionsPage} />
         <Route path="/coordinator/timetable" component={CoordinatorTimetable} />
+        <Route path="/coordinator/upload" component={CoordinatorUpload} />
 
         <Route path="/lecturer" component={LecturerPortal} />
         <Route path="/lecturer/grades" component={LecturerGrades} />
@@ -91,6 +94,7 @@ function App() {
               <SentinelChat onActiveChange={setSentinelActive} />
               <SentinelPulse active={sentinelActive} label="UOU Sentinel Processing" />
               <SocialProofTicker />
+              <NewsTicker />
             </AuthProvider>
           </ErrorBoundary>
         </WouterRouter>

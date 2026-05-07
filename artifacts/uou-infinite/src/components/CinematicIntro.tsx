@@ -172,8 +172,13 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
                 </motion.div>
 
                 <motion.h1
-                  className="font-black tracking-tight leading-none"
-                  style={{ fontSize: "clamp(2.8rem, 9vw, 7rem)", color: "#fff" }}
+                  className="font-semibold tracking-[0.12em] leading-snug"
+                  style={{
+                    fontSize: "24px",
+                    color: "#fff",
+                    fontFamily: 'Georgia, "Times New Roman", Garamond, serif',
+                    letterSpacing: "0.1em",
+                  }}
                 >
                   {"Unique ".split("").map((c, i) => (
                     <motion.span
