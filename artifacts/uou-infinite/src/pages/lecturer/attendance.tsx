@@ -215,7 +215,7 @@ export default function LecturerAttendance() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-foreground truncate">{student.name}</div>
                   <div className="text-[10px] font-mono text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                    {student.studentId}
+                    {student.id}
                     <span className="px-1 rounded text-[9px]" style={{ background: `${campusColor}18`, color: campusColor }}>{student.campus}</span>
                   </div>
                 </div>

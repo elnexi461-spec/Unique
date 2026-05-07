@@ -215,7 +215,7 @@ export default function LecturerAnalytics() {
                       </td>
                       <td className="px-4 py-2.5">
                         <div className="font-semibold text-foreground text-sm">{student.name}</div>
-                        <div className="text-[10px] font-mono text-muted-foreground">{student.studentId}</div>
+                        <div className="text-[10px] font-mono text-muted-foreground">{student.id}</div>
                       </td>
                       <td className="px-4 py-2.5">
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${campusColor}18`, color: campusColor }}>
@@ -265,7 +265,7 @@ export default function LecturerAnalytics() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-foreground truncate">{s.name}</div>
-                        <div className="text-[10px] text-muted-foreground font-mono">{s.studentId}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">{s.id}</div>
                         <div className="flex items-center gap-2 mt-1.5">
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                             style={{ background: "rgba(248,113,113,0.15)", color: BRAND.red }}>

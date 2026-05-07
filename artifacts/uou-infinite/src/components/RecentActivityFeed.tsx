@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, BookOpen, Award, Upload, MousePointerClick, LogIn, Zap } from "lucide-react";
+import { Activity, BookOpen, Award, Upload, MousePointerClick, LogIn, Zap, Video } from "lucide-react";
 import { UserActivityService, type ActivityEntry } from "@/lib/UserActivityService";
 
 const TYPE_META: Record<string, { icon: React.ElementType; color: string; label: string }> = {
-  lecture_view:   { icon: BookOpen,         color: "#60A5FA", label: "Lecture Viewed" },
-  slide_view:     { icon: BookOpen,         color: "#60A5FA", label: "Slides Completed" },
-  video_progress: { icon: Zap,              color: "#A78BFA", label: "Video Progress" },
-  pdf_upload:     { icon: Upload,           color: "#34D399", label: "PDF Upload" },
-  quiz_complete:  { icon: Activity,         color: "#F59E0B", label: "Quiz Completed" },
-  gold_card_mint: { icon: Award,            color: "#F59E0B", label: "Gold Card Minted" },
-  button_click:   { icon: MousePointerClick,color: "#60A5FA", label: "Action" },
-  page_visit:     { icon: Activity,         color: "#6B7280", label: "Page Visit" },
-  login:          { icon: LogIn,            color: "#34D399", label: "Login" },
-  logout:         { icon: LogIn,            color: "#F87171", label: "Logout" },
+  lecture_view:     { icon: BookOpen,          color: "#60A5FA", label: "Lecture Viewed" },
+  slide_view:       { icon: BookOpen,          color: "#60A5FA", label: "Slides Completed" },
+  video_progress:   { icon: Zap,               color: "#A78BFA", label: "Video Progress" },
+  pdf_upload:       { icon: Upload,            color: "#34D399", label: "PDF Upload" },
+  quiz_complete:    { icon: Activity,          color: "#F59E0B", label: "Quiz Completed" },
+  gold_card_mint:   { icon: Award,             color: "#F59E0B", label: "Gold Card Minted" },
+  button_click:     { icon: MousePointerClick, color: "#60A5FA", label: "Action" },
+  page_visit:       { icon: Activity,          color: "#6B7280", label: "Page Visit" },
+  login:            { icon: LogIn,             color: "#34D399", label: "Login" },
+  logout:           { icon: LogIn,             color: "#F87171", label: "Logout" },
+  video_generation: { icon: Video,             color: "#A78BFA", label: "Video Generated" },
 };
 
 interface RecentActivityFeedProps {
@@ -85,7 +86,7 @@ export function RecentActivityFeed({
         ) : (
           <AnimatePresence initial={false}>
             {entries.map((entry, i) => {
-              const meta = TYPE_META[entry.type] ?? TYPE_META.button_click;
+              const meta = TYPE_META[entry.type] ?? TYPE_META["button_click"]!;
               const Icon = meta.icon;
               const time = new Date(entry.timestamp).toLocaleTimeString("en-GB", {
                 hour: "2-digit",

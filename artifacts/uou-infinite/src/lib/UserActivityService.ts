@@ -10,7 +10,8 @@ export interface ActivityEntry {
     | "button_click"
     | "page_visit"
     | "login"
-    | "logout";
+    | "logout"
+    | "video_generation";
   label: string;
   email: string;
   role: string;

@@ -3,9 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { useListCourses } from "@workspace/api-client-react";
 import { SentinelPlayer } from "@/components/SentinelPlayer";
+import { HeyGenBridgeModal } from "@/components/HeyGenBridgeModal";
+import { VideoGenerationProgress } from "@/components/VideoGenerationProgress";
+import { VideoEngineService } from "@/lib/VideoEngineService";
+import { UserActivityService } from "@/lib/UserActivityService";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Upload, FileText, CheckCircle, Cpu,
-  Zap, Eye, RotateCcw, BookOpen, ChevronDown,
+  Zap, Eye, RotateCcw, BookOpen, ChevronDown, Video,
+  Shield, Key, Trash2,
 } from "lucide-react";
 
 interface ProcessingStage {
@@ -16,10 +23,10 @@ interface ProcessingStage {
 }
 
 const STAGES: ProcessingStage[] = [
-  { label: "Chunking PDF into semantic units", detail: "Splitting document into paragraph-level semantic blocks…", from: 0, to: 32 },
-  { label: "Extracting key concepts & hierarchies", detail: "Identifying main themes, subtopics, and knowledge dependencies…", from: 32, to: 65 },
-  { label: "Synthesising Sentinel Lecture Video", detail: "Generating cinematic slide sequence with AI narration script…", from: 65, to: 88 },
-  { label: "Calibrating AI narrator voice model", detail: "Fine-tuning prosody and pacing for academic delivery…", from: 88, to: 100 },
+  { label: "Chunking PDF into semantic units",         detail: "Splitting document into paragraph-level semantic blocks…",            from: 0,  to: 32 },
+  { label: "Extracting key concepts & hierarchies",    detail: "Identifying main themes, subtopics, and knowledge dependencies…",     from: 32, to: 65 },
+  { label: "Synthesising Sentinel Lecture Video",      detail: "Generating cinematic slide sequence with AI narration script…",       from: 65, to: 88 },
+  { label: "Calibrating AI narrator voice model",      detail: "Fine-tuning prosody and pacing for academic delivery…",               from: 88, to: 100 },
 ];
 
 const FALLBACK_COURSES = [
@@ -31,20 +38,26 @@ const FALLBACK_COURSES = [
   { id: 6, code: "BAM-111", title: "Business Administration & Management" },
 ];
 
-type UploadState = "idle" | "dragging" | "processing" | "complete" | "preview";
+type UploadState = "idle" | "dragging" | "processing" | "complete" | "video_gen" | "preview";
 
 interface UploadedFile { name: string; size: number; pages: number; }
 
 export default function LecturerUpload() {
   const { data: apiCourses } = useListCourses();
   const courses = (apiCourses && apiCourses.length > 0) ? apiCourses : FALLBACK_COURSES;
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const [uploadState, setUploadState] = useState<UploadState>("idle");
-  const [progress, setProgress] = useState(0);
-  const [stageIdx, setStageIdx] = useState(0);
-  const [file, setFile] = useState<UploadedFile | null>(null);
+  const [uploadState, setUploadState]         = useState<UploadState>("idle");
+  const [progress, setProgress]               = useState(0);
+  const [stageIdx, setStageIdx]               = useState(0);
+  const [file, setFile]                       = useState<UploadedFile | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState<number>(5);
-  const dropRef = useRef<HTMLDivElement>(null);
+  const [showBridgeModal, setShowBridgeModal] = useState(false);
+  const [demoMode, setDemoMode]               = useState(false);
+  const [hasApiKey, setHasApiKey]             = useState(() => VideoEngineService.hasKey());
+
+  const dropRef     = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedCourse = courses.find((c: any) => c.id === selectedCourseId) ?? courses[0];
@@ -71,14 +84,62 @@ export default function LecturerUpload() {
     if (!files || files.length === 0) return;
     const f = files[0]!;
     setFile({ name: f.name, size: f.size, pages: Math.floor(Math.random() * 18 + 8) });
+    UserActivityService.log({
+      type: "pdf_upload",
+      label: `PDF uploaded: ${f.name} → ${selectedCourse?.code ?? "Unknown"}`,
+      email: user?.email ?? "unknown",
+      role: user?.role ?? "lecturer",
+      metadata: { fileName: f.name, courseId: selectedCourseId, courseCode: selectedCourse?.code },
+    });
     setTimeout(() => runProcessing(), 400);
-  }, [runProcessing]);
+  }, [runProcessing, selectedCourse, user, selectedCourseId]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setUploadState("idle"); handleFiles(e.dataTransfer.files);
   }, [handleFiles]);
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setUploadState("dragging"); };
   const handleDragLeave = () => setUploadState("idle");
+
+  /* ── Trigger video generation (checks key first) ── */
+  const handleGenerateVideo = () => {
+    if (!VideoEngineService.hasKey()) {
+      setShowBridgeModal(true);
+      return;
+    }
+    setDemoMode(false);
+    setUploadState("video_gen");
+  };
+
+  /* ── Bridge modal callbacks ── */
+  const handleBridgeConfirm = (_key: string) => {
+    setHasApiKey(true);
+    setShowBridgeModal(false);
+    setDemoMode(false);
+    setUploadState("video_gen");
+  };
+
+  const handleDemoMode = () => {
+    setShowBridgeModal(false);
+    setDemoMode(true);
+    setUploadState("video_gen");
+  };
+
+  /* ── Video generation complete ── */
+  const handleVideoGenComplete = () => {
+    const mode = demoMode ? "Demo" : "HeyGen";
+    UserActivityService.log({
+      type: "video_generation",
+      label: `Lecturer initiated Video Synthesis via ${mode} Bridge — Course: ${selectedCourse?.code ?? "Unknown"} — Status: Complete`,
+      email: user?.email ?? "unknown",
+      role: user?.role ?? "lecturer",
+      metadata: { courseId: selectedCourseId, courseCode: selectedCourse?.code, mode, demoMode },
+    });
+    toast({
+      title: demoMode ? "Demo Video Ready" : "HeyGen Synthesis Complete",
+      description: `Lecture video for ${selectedCourse?.code ?? "course"} has been synthesised and is ready for preview.`,
+    });
+    setUploadState("preview");
+  };
 
   const currentStage = STAGES[stageIdx] ?? STAGES[0]!;
   const progressInStage = stageIdx < STAGES.length
@@ -88,6 +149,18 @@ export default function LecturerUpload() {
 
   return (
     <div className="space-y-6 pb-10">
+
+      {/* HeyGen Bridge Modal */}
+      <AnimatePresence>
+        {showBridgeModal && (
+          <HeyGenBridgeModal
+            onConfirm={handleBridgeConfirm}
+            onDemoMode={handleDemoMode}
+            onClose={() => setShowBridgeModal(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Nav */}
       <div className="flex items-center gap-4">
         <Link href="/lecturer">
@@ -115,13 +188,60 @@ export default function LecturerUpload() {
         </p>
       </motion.div>
 
+      {/* ── HeyGen API Key Status Bar ── */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+        className="rounded-xl border px-4 py-3 flex items-center gap-3"
+        style={{
+          background: hasApiKey ? "rgba(52,211,153,0.06)" : "rgba(245,158,11,0.06)",
+          borderColor: hasApiKey ? "rgba(52,211,153,0.25)" : "rgba(245,158,11,0.25)",
+        }}>
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+          style={{
+            background: hasApiKey ? "rgba(52,211,153,0.12)" : "rgba(245,158,11,0.12)",
+            border: `1px solid ${hasApiKey ? "rgba(52,211,153,0.3)" : "rgba(245,158,11,0.3)"}`,
+          }}>
+          {hasApiKey ? <Shield size={13} style={{ color: "#34D399" }} /> : <Key size={13} style={{ color: "#F59E0B" }} />}
+        </div>
+        <div className="flex-1">
+          <div className="text-[10px] font-bold uppercase tracking-widest"
+            style={{ color: hasApiKey ? "#34D399" : "#F59E0B" }}>
+            HeyGen Video Bridge
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {hasApiKey
+              ? "API key active · Video generation enabled · Full HeyGen synthesis available"
+              : "No API key configured · Will prompt when generating · Demo mode available"}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {hasApiKey && (
+            <button
+              onClick={() => { VideoEngineService.clearApiKey(); setHasApiKey(false); }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors hover:bg-white/5"
+              style={{ color: "rgba(248,113,113,0.7)", border: "1px solid rgba(248,113,113,0.15)" }}>
+              <Trash2 size={10} /> Remove Key
+            </button>
+          )}
+          <button
+            onClick={() => setShowBridgeModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all"
+            style={{
+              background: hasApiKey ? "rgba(96,165,250,0.08)" : "rgba(245,158,11,0.1)",
+              color: hasApiKey ? "#60A5FA" : "#FBBF24",
+              border: `1px solid ${hasApiKey ? "rgba(96,165,250,0.2)" : "rgba(245,158,11,0.3)"}`,
+            }}>
+            <Key size={10} /> {hasApiKey ? "Update Key" : "Configure Key"}
+          </button>
+        </div>
+      </motion.div>
+
       <AnimatePresence mode="wait">
 
         {/* IDLE / DRAGGING */}
         {(uploadState === "idle" || uploadState === "dragging") && (
           <motion.div key="idle" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} className="grid gap-6">
 
-            {/* Course Selector — required */}
+            {/* Course Selector */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
               className="rounded-xl border p-4 flex items-center gap-4"
               style={{ background: "rgba(4,10,36,0.88)", borderColor: "rgba(96,165,250,0.20)" }}>
@@ -197,9 +317,9 @@ export default function LecturerUpload() {
             {/* Info cards */}
             <div className="grid sm:grid-cols-3 gap-4">
               {[
-                { icon: Cpu, title: "AI Chunking", desc: "Semantic paragraph-level extraction from your course PDF" },
-                { icon: Zap, title: "Sentinel Synthesis", desc: "AI generates slide sequence with narration script" },
-                { icon: Eye, title: "Live Preview", desc: "Review the synthesised lecture before publishing to students" },
+                { icon: Cpu,   title: "AI Chunking",       desc: "Semantic paragraph-level extraction from your course PDF" },
+                { icon: Zap,   title: "Sentinel Synthesis", desc: "AI generates slide sequence with narration script" },
+                { icon: Video, title: "HeyGen Avatar",      desc: "Real-time avatar video generation via HeyGen Bridge" },
               ].map((c, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}
                   className="rounded-xl p-4 border flex flex-col gap-2"
@@ -312,18 +432,18 @@ export default function LecturerUpload() {
                   <RotateCcw size={11} /> New Upload
                 </motion.button>
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  onClick={() => setUploadState("preview")}
+                  onClick={handleGenerateVideo}
                   className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold"
                   style={{ background: "linear-gradient(135deg,#1D4ED8,#3B82F6)", color: "white", boxShadow: "0 0 16px rgba(59,130,246,0.4)" }}>
-                  <Eye size={12} /> Preview Lecture
+                  <Video size={12} /> Generate Video
                 </motion.button>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { label: "Semantic Chunks", value: `${Math.floor((file?.pages ?? 12) * 3.2)}` },
-                { label: "Key Concepts", value: `${Math.floor((file?.pages ?? 12) * 1.8)}` },
-                { label: "Slides Generated", value: "5" },
+                { label: "Key Concepts",    value: `${Math.floor((file?.pages ?? 12) * 1.8)}` },
+                { label: "Slides Generated",value: "5" },
                 { label: "Processing Time", value: "14.2s" },
               ].map((s, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
@@ -336,11 +456,28 @@ export default function LecturerUpload() {
           </motion.div>
         )}
 
+        {/* VIDEO GENERATION — cyberpunk progress */}
+        {uploadState === "video_gen" && (
+          <motion.div key="video_gen" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <VideoGenerationProgress
+              demoMode={demoMode}
+              courseCode={selectedCourse?.code ?? "BAM-111"}
+              onComplete={handleVideoGenComplete}
+            />
+          </motion.div>
+        )}
+
         {/* PREVIEW */}
         {uploadState === "preview" && (
           <motion.div key="preview-full" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-semibold text-foreground">
+              <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                {demoMode && (
+                  <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(245,158,11,0.12)", color: "#FBBF24", border: "1px solid rgba(245,158,11,0.25)" }}>
+                    Demo Mode
+                  </span>
+                )}
                 Sentinel Lecture Preview · <span style={{ color: "#60A5FA" }}>{selectedCourse?.code}</span>
               </div>
               <button onClick={() => setUploadState("complete")}

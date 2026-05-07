@@ -9,8 +9,12 @@ import {
   Users, BookOpen, GraduationCap, AlertTriangle, Activity, Zap, RefreshCw,
   Upload, Megaphone, Loader2, CheckCircle, Radio, Shield, TrendingUp,
   TrendingDown, Award, MapPin, Brain, Star, Database, UserPlus, Copy, X,
-  Search, Trophy, Lock, FileText, Clock, Filter, BarChart2,
+  Search, Trophy, Lock, FileText, Clock, Filter, BarChart2, Key, Video,
+  Trash2, Eye, EyeOff,
 } from "lucide-react";
+import { HeyGenBridgeModal } from "@/components/HeyGenBridgeModal";
+import { VideoGenerationProgress } from "@/components/VideoGenerationProgress";
+import { VideoEngineService } from "@/lib/VideoEngineService";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 import { UserActivityService } from "@/lib/UserActivityService";
 import {
@@ -594,14 +598,15 @@ function ActivityRoleSummary() {
   };
 
   const typeLabels: Record<string, string> = {
-    lecture_view:   "Lectures Viewed",
-    slide_view:     "Slides Completed",
-    quiz_complete:  "Quizzes",
-    gold_card_mint: "Gold Cards Minted",
-    pdf_upload:     "PDF Uploads",
-    login:          "Logins",
-    button_click:   "Actions",
-    page_visit:     "Page Visits",
+    lecture_view:     "Lectures Viewed",
+    slide_view:       "Slides Completed",
+    quiz_complete:    "Quizzes",
+    gold_card_mint:   "Gold Cards Minted",
+    pdf_upload:       "PDF Uploads",
+    login:            "Logins",
+    button_click:     "Actions",
+    page_visit:       "Page Visits",
+    video_generation: "Videos Generated",
   };
 
   return (
@@ -686,7 +691,7 @@ export default function FounderPage() {
   const { data: engagement }        = useGetDashboardEngagement();
   const { data: courseDistribution }= useGetDashboardCourseDistribution();
   const { data: geographic }        = useGetDashboardGeographic();
-  const { token }                   = useAuth();
+  const { token, user }             = useAuth();
   const { toast }                   = useToast();
 
   const [activeTab, setActiveTab] = useState<"brief" | "analytics" | "scout" | "registry" | "controls" | "audit" | "activity">("brief");
@@ -705,6 +710,13 @@ export default function FounderPage() {
   const [importing,    setImporting]    = useState(false);
   const [importResult, setImportResult] = useState<{ imported: number; errors: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  /* HeyGen / Video Engine state */
+  const [hasApiKey,          setHasApiKey]          = useState(() => VideoEngineService.hasKey());
+  const [showBridgeModal,    setShowBridgeModal]     = useState(false);
+  const [videoGenActive,     setVideoGenActive]      = useState(false);
+  const [videoGenDemoMode,   setVideoGenDemoMode]    = useState(false);
+  const [showApiKeyValue,    setShowApiKeyValue]     = useState(false);
 
   /* Scout state */
   const [scoutCampus, setScoutCampus] = useState<"All" | "Zaria" | "Lagos" | "Kano">("All");
@@ -1377,6 +1389,156 @@ export default function FounderPage() {
             exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.35 }}
             className="space-y-4">
 
+            {/* ── HeyGen API Configuration ── */}
+            <div className="rounded-2xl border overflow-hidden"
+              style={{ background: "rgba(4,10,36,0.92)", borderColor: `${hasApiKey ? "rgba(52,211,153,0.3)" : "rgba(245,158,11,0.3)"}` }}>
+              <div className="px-5 py-4 border-b flex items-center justify-between"
+                style={{ borderColor: "rgba(96,165,250,0.1)", background: "rgba(4,10,36,0.4)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ background: hasApiKey ? "rgba(52,211,153,0.12)" : "rgba(245,158,11,0.12)", border: `1px solid ${hasApiKey ? "rgba(52,211,153,0.3)" : "rgba(245,158,11,0.3)"}` }}>
+                    <Key size={14} style={{ color: hasApiKey ? "#34D399" : "#F59E0B" }} />
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-bold uppercase tracking-[0.3em]" style={{ color: hasApiKey ? "rgba(52,211,153,0.7)" : "rgba(245,158,11,0.7)" }}>
+                      Video Engine
+                    </div>
+                    <div className="text-sm font-black text-white">HeyGen API Bridge</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest"
+                  style={{
+                    background: hasApiKey ? "rgba(52,211,153,0.1)" : "rgba(245,158,11,0.1)",
+                    color:      hasApiKey ? "#34D399" : "#FBBF24",
+                    border:     `1px solid ${hasApiKey ? "rgba(52,211,153,0.25)" : "rgba(245,158,11,0.25)"}`,
+                  }}>
+                  <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.4, repeat: Infinity }}
+                    className="w-1.5 h-1.5 rounded-full" style={{ background: hasApiKey ? "#34D399" : "#F59E0B" }} />
+                  {hasApiKey ? "Bridge Active" : "Not Configured"}
+                </div>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Configure the HeyGen API key to enable global AI avatar video synthesis for all courses.
+                  Once active, lecturers and the Founder can generate real-time synthesis videos from PDFs.
+                </p>
+
+                {hasApiKey && (
+                  <div className="rounded-xl p-3 flex items-center gap-2 font-mono"
+                    style={{ background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.18)" }}>
+                    <Shield size={12} style={{ color: "#34D399" }} />
+                    <span className="text-xs flex-1" style={{ color: "rgba(52,211,153,0.8)" }}>
+                      {showApiKeyValue
+                        ? (VideoEngineService.getApiKey() ?? "")
+                        : `hg_${"•".repeat(28)}`}
+                    </span>
+                    <button onClick={() => setShowApiKeyValue(v => !v)}
+                      className="text-muted-foreground hover:text-primary transition-colors">
+                      {showApiKeyValue ? <EyeOff size={12} /> : <Eye size={12} />}
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => setShowBridgeModal(true)}
+                    className="flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+                    style={{
+                      background: hasApiKey ? "rgba(96,165,250,0.08)" : "linear-gradient(135deg,#1D4ED8,#3B82F6)",
+                      color:      hasApiKey ? "#60A5FA" : "white",
+                      border:     hasApiKey ? "1px solid rgba(96,165,250,0.2)" : "none",
+                      boxShadow:  hasApiKey ? "none" : "0 0 20px rgba(59,130,246,0.3)",
+                    }}>
+                    <Key size={12} /> {hasApiKey ? "Update Key" : "Configure API Key"}
+                  </motion.button>
+                  {hasApiKey && (
+                    <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
+                      onClick={() => { VideoEngineService.clearApiKey(); setHasApiKey(false); setShowApiKeyValue(false); }}
+                      className="py-2.5 px-4 rounded-xl text-xs font-medium flex items-center gap-1.5"
+                      style={{ background: "rgba(248,113,113,0.08)", color: "#F87171", border: "1px solid rgba(248,113,113,0.18)" }}>
+                      <Trash2 size={11} /> Remove
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Global Video Synthesis ── */}
+            <div className="rounded-2xl border overflow-hidden"
+              style={{ background: "rgba(4,10,36,0.92)", borderColor: "rgba(96,165,250,0.25)" }}>
+              <div className="px-5 py-4 border-b"
+                style={{ borderColor: "rgba(96,165,250,0.1)", background: "rgba(4,10,36,0.4)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)" }}>
+                    <Video size={14} className="text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-bold uppercase tracking-[0.3em]" style={{ color: "rgba(96,165,250,0.6)" }}>
+                      Founder Command
+                    </div>
+                    <div className="text-sm font-black text-white">Global Video Synthesis</div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Initiate institution-wide AI lecture video generation across all five core courses simultaneously.
+                  Logs to the institutional activity ledger.
+                </p>
+                <AnimatePresence mode="wait">
+                  {videoGenActive ? (
+                    <motion.div key="vgen-progress"
+                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                      <VideoGenerationProgress
+                        demoMode={videoGenDemoMode}
+                        courseCode="ALL-COURSES"
+                        onComplete={() => {
+                          const mode = videoGenDemoMode ? "Demo" : "HeyGen";
+                          UserActivityService.log({
+                            type: "video_generation",
+                            label: `Founder initiated Global Video Synthesis via ${mode} Bridge — Status: Complete`,
+                            email: user?.email ?? "founder",
+                            role: "founder",
+                            metadata: { scope: "global", mode, courseCount: 5 },
+                          });
+                          toast({
+                            title: "Global Synthesis Complete",
+                            description: `All 5 course videos synthesised via ${mode} Bridge and logged to the institutional ledger.`,
+                          });
+                          setVideoGenActive(false);
+                        }}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div key="vgen-idle"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="space-y-2">
+                      <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
+                        onClick={() => {
+                          if (!VideoEngineService.hasKey()) {
+                            setShowBridgeModal(true);
+                          } else {
+                            setVideoGenDemoMode(false);
+                            setVideoGenActive(true);
+                          }
+                        }}
+                        className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                        style={{ background: "linear-gradient(135deg,#1D4ED8,#3B82F6,#60A5FA)", color: "white", boxShadow: "0 0 24px rgba(59,130,246,0.3)" }}>
+                        <Zap size={14} /> Generate Video from PDF
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
+                        onClick={() => { setVideoGenDemoMode(true); setVideoGenActive(true); }}
+                        className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2"
+                        style={{ background: "rgba(245,158,11,0.08)", color: "#FBBF24", border: "1px solid rgba(245,158,11,0.2)" }}>
+                        <Video size={12} /> Run in Demo Mode
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Supernatural Seed */}
               <Card className="bg-card border-border">
@@ -1549,6 +1711,35 @@ export default function FounderPage() {
           </motion.div>
         )}
 
+      </AnimatePresence>
+
+      {/* HeyGen Bridge Modal */}
+      <AnimatePresence>
+        {showBridgeModal && (
+          <HeyGenBridgeModal
+            onConfirm={(key) => {
+              VideoEngineService.setApiKey(key);
+              setHasApiKey(true);
+              setShowBridgeModal(false);
+              setVideoGenDemoMode(false);
+              setVideoGenActive(true);
+              UserActivityService.log({
+                type: "button_click",
+                label: "Founder configured HeyGen API Bridge — key saved to institutional ledger",
+                email: user?.email ?? "founder",
+                role: "founder",
+                metadata: { action: "api_key_saved" },
+              });
+              toast({ title: "Bridge Established", description: "HeyGen API key saved. Global video synthesis is now active." });
+            }}
+            onDemoMode={() => {
+              setShowBridgeModal(false);
+              setVideoGenDemoMode(true);
+              setVideoGenActive(true);
+            }}
+            onClose={() => setShowBridgeModal(false)}
+          />
+        )}
       </AnimatePresence>
 
       {/* Provision Modal */}
