@@ -5,8 +5,9 @@ import {
   LayoutDashboard, Users, BookOpen, FileText,
   Award, Activity, LogOut, Shield,
   Menu, X, Calendar, TrendingUp, GraduationCap,
-  Newspaper, Map, Zap, Upload, Bell, CreditCard,
-  Library, IdCard, MessageSquare, Brain, Gem, User2,
+  Newspaper, Zap, Upload, Bell, CreditCard,
+  IdCard, MessageSquare, Brain, Gem, User2,
+  Cpu, ClipboardCheck, BarChart2, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,11 +49,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Courses",          href: "/coordinator/courses",       icon: BookOpen },
       { label: "Admissions",       href: "/coordinator/admissions",    icon: FileText },
       { label: "Timetable",        href: "/coordinator/timetable",     icon: Calendar },
-      { label: "Upload PDF",       href: "/coordinator/upload",        icon: Upload },
     ] : []),
     ...(user.role === "lecturer" ? [
       { label: "Portal",           href: "/lecturer",                  icon: LayoutDashboard },
       { label: "Grades",           href: "/lecturer/grades",           icon: TrendingUp },
+      { label: "AI Synthesis",     href: "/lecturer/upload",           icon: Cpu },
+      { label: "Attendance",       href: "/lecturer/attendance",       icon: ClipboardCheck },
+      { label: "Analytics",        href: "/lecturer/analytics",        icon: BarChart2 },
+      { label: "Announcements",    href: "/lecturer/announcements",    icon: Megaphone },
     ] : []),
     ...(user.role === "student" ? [
       { label: "Portal",           href: "/student",                   icon: LayoutDashboard },

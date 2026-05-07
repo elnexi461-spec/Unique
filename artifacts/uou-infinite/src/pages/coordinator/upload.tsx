@@ -99,6 +99,29 @@ export default function CoordinatorUpload() {
         </span>
       </div>
 
+      {/* Relocation Notice */}
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+        className="rounded-xl border px-5 py-3.5 flex items-center justify-between gap-4"
+        style={{ background: "rgba(245,158,11,0.07)", borderColor: "rgba(245,158,11,0.25)" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: "rgba(245,158,11,0.18)" }}>
+            <Cpu size={12} style={{ color: "#F59E0B" }} />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold" style={{ color: "#F59E0B" }}>AI Synthesis has moved.</span>{" "}
+            Faculty PDF synthesis is now managed from the Lecturer Portal for better workflow integration.
+          </p>
+        </div>
+        <Link href="/lecturer/upload">
+          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border"
+            style={{ background: "rgba(245,158,11,0.12)", borderColor: "rgba(245,158,11,0.3)", color: "#F59E0B" }}>
+            Go to Lecturer Portal →
+          </motion.button>
+        </Link>
+      </motion.div>
+
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
         <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">

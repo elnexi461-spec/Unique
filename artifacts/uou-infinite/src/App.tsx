@@ -29,6 +29,10 @@ import CoordinatorUpload from "@/pages/coordinator/upload";
 
 import LecturerPortal from "@/pages/lecturer/portal";
 import LecturerGrades from "@/pages/lecturer/grades";
+import LecturerUpload from "@/pages/lecturer/upload";
+import LecturerAttendance from "@/pages/lecturer/attendance";
+import LecturerAnalytics from "@/pages/lecturer/analytics";
+import LecturerAnnouncements from "@/pages/lecturer/announcements";
 
 import StudentPortal from "@/pages/student/portal";
 import StudentCourses from "@/pages/student/courses";
@@ -73,6 +77,10 @@ function Router() {
 
         <Route path="/lecturer" component={LecturerPortal} />
         <Route path="/lecturer/grades" component={LecturerGrades} />
+        <Route path="/lecturer/upload" component={LecturerUpload} />
+        <Route path="/lecturer/attendance" component={LecturerAttendance} />
+        <Route path="/lecturer/analytics" component={LecturerAnalytics} />
+        <Route path="/lecturer/announcements" component={LecturerAnnouncements} />
 
         <Route path="/student" component={StudentPortal} />
         <Route path="/student/courses" component={StudentCourses} />
