@@ -130,7 +130,7 @@ export default function CoordinatorTimetable() {
                     <Select value={form.courseId} onValueChange={v => setForm(f => ({ ...f, courseId: v }))}>
                       <SelectTrigger><SelectValue placeholder="Select course..." /></SelectTrigger>
                       <SelectContent>
-                        {courses?.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.code} — {c.title}</SelectItem>)}
+                        {courses?.map((c: any) => <SelectItem key={c.id} value={String(c.id)}>{c.code} — {c.title}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>

@@ -20,7 +20,7 @@ export default function CourseCatalog() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {courses?.map((course, i) => {
+        {courses?.map((course: any, i: number) => {
           const enrolled = Math.floor(Math.random() * course.capacity);
           const percent = Math.round((enrolled / course.capacity) * 100);
           const isFull = percent > 90;

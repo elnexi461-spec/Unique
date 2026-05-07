@@ -444,7 +444,7 @@ export default function CoordinatorUpload() {
 
             {/* Inline player */}
             <AnimatePresence>
-              {uploadState === "preview" && (
+              {(uploadState as string) === "preview" && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}

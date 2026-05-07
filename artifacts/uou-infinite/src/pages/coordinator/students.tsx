@@ -10,7 +10,7 @@ export default function StudentsList() {
   const { data: students, isLoading } = useListStudents();
   const [search, setSearch] = useState("");
 
-  const filtered = students?.filter(s => 
+  const filtered = students?.filter((s: any) => 
     s.name.toLowerCase().includes(search.toLowerCase()) || 
     s.studentId.toLowerCase().includes(search.toLowerCase())
   );
@@ -49,7 +49,7 @@ export default function StudentsList() {
           <TableBody>
             {isLoading ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8">Loading data stream...</TableCell></TableRow>
-            ) : filtered?.map((student, i) => (
+            ) : filtered?.map((student: any, i: number) => (
               <TableRow key={student.id}>
                 <TableCell className="font-mono text-xs">{student.studentId}</TableCell>
                 <TableCell className="font-medium text-primary">{student.name}</TableCell>

@@ -10,7 +10,7 @@ export default function LecturerPortal() {
   const { user } = useAuth();
   const { data: courses } = useListCourses();
   const { data: students } = useListStudents();
-  const myCourses = courses?.filter(c => c.lecturerId === user?.id) || courses?.slice(0, 3);
+  const myCourses = courses?.filter((c: any) => c.lecturerId === user?.id) || courses?.slice(0, 3);
 
   const quickLinks = [
     { href: "/lecturer/grades", icon: TrendingUp, label: "Grade Entry", desc: "Record test, exam, and assignment scores" },
@@ -50,7 +50,7 @@ export default function LecturerPortal() {
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" /> Active Courses
           </h2>
-          {myCourses?.map((course, i) => (
+          {myCourses?.map((course: any, i: number) => (
             <motion.div key={course.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Card className="bg-card border-border hover:border-primary/30 transition-colors">
                 <CardHeader className="pb-3 flex flex-row justify-between items-start">
@@ -81,7 +81,7 @@ export default function LecturerPortal() {
           <Card className="bg-card border-border">
             <CardContent className="p-0">
               <div className="divide-y divide-border">
-                {students?.slice(0, 6).map((student) => (
+                {students?.slice(0, 6).map((student: any) => (
                   <div key={student.id} className="p-4 flex items-center justify-between hover:bg-sidebar/50 transition-colors">
                     <div>
                       <div className="font-medium text-sm text-foreground">{student.name}</div>

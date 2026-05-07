@@ -6,7 +6,7 @@ import {
   Award, Activity, LogOut, Shield,
   Menu, X, Calendar, TrendingUp, GraduationCap,
   Newspaper, Map, Zap, Upload, Bell, CreditCard,
-  Library, IdCard, MessageSquare, Brain,
+  Library, IdCard, MessageSquare, Brain, Gem, User2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,6 +67,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Student ID",       href: "/student/idcard",            icon: IdCard },
       { label: "Appeals",          href: "/student/appeals",           icon: MessageSquare },
       { label: "Vanguard Guardian",href: "/student/guardian",          icon: Brain },
+      { label: "Gold Card Vault",  href: "/student/vault",             icon: Gem },
+      { label: "My Profile",       href: "/student/profile",           icon: User2 },
     ] : []),
   ];
 

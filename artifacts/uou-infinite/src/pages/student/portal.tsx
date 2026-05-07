@@ -2,17 +2,18 @@ import { useAuth } from "@/lib/auth-context";
 import { useListEnrollments } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Award, Activity, TrendingUp, Calendar, Zap, Brain } from "lucide-react";
+import { BookOpen, Award, Activity, TrendingUp, Calendar, Zap, Brain, Gem, User2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { SkillGraph } from "@/components/SkillGraph";
 import { VanguardLeaderboard } from "@/components/VanguardLeaderboard";
+import { StudyStreak } from "@/components/StudyStreak";
 
 export default function StudentPortal() {
   const { user } = useAuth();
   const { data: enrollments } = useListEnrollments();
 
-  const passed = enrollments?.filter(e => e.grade && !["F", "Ongoing"].includes(e.grade)).length ?? 0;
+  const passed = enrollments?.filter((e: any) => e.grade && !["F", "Ongoing"].includes(e.grade)).length ?? 0;
   const total  = enrollments?.length ?? 0;
 
   const quickLinks = [
@@ -21,6 +22,8 @@ export default function StudentPortal() {
     { href: "/student/courses",    icon: BookOpen,   label: "Course Browser",        desc: "Browse & enroll in courses" },
     { href: "/student/credential", icon: Award,      label: "Credential Passport",   desc: "Cryptographic proof of skill" },
     { href: "/student/guardian",   icon: Brain,      label: "Vanguard Guardian",     desc: "AI diagnostics & private chat" },
+    { href: "/student/vault",      icon: Gem,        label: "Gold Card Vault",        desc: "All minted achievement cards" },
+    { href: "/student/profile",    icon: User2,      label: "Scholar Profile",        desc: "Achievements, streaks & stats" },
   ];
 
   return (
@@ -44,10 +47,7 @@ export default function StudentPortal() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="rounded-xl border p-3.5 flex items-center gap-3"
-        style={{
-          background:   "rgba(8,20,60,0.7)",
-          borderColor:  "rgba(59,130,246,0.2)",
-        }}
+        style={{ background: "rgba(8,20,60,0.7)", borderColor: "rgba(59,130,246,0.2)" }}
       >
         <motion.div
           animate={{ opacity: [0.5, 1, 0.5] }}
@@ -55,28 +55,33 @@ export default function StudentPortal() {
           className="w-2 h-2 rounded-full shrink-0"
           style={{ background: "#3B82F6", boxShadow: "0 0 8px #3B82F6" }}
         />
-        <p className="text-sm italic" style={{ color: "rgba(147,197,253,0.85)" }}>
+        <p className="text-sm italic flex-1" style={{ color: "rgba(147,197,253,0.85)" }}>
           "Your value is increasing, Scholar. The Sentinel is monitoring your progress across all sessions."
         </p>
         <Zap size={14} className="text-primary shrink-0" />
       </motion.div>
 
+      {/* Study Streak */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <StudyStreak />
+      </motion.div>
+
       {/* 2-col grid: quick links + skill graph */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Quick links */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {quickLinks.map((item, i) => (
             <motion.div
               key={item.href}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.4 }}
+              transition={{ delay: i * 0.07, duration: 0.4 }}
             >
               <Link href={item.href}>
-                <div className="group cursor-pointer rounded-xl border border-border bg-card p-4 hover:border-primary/50 hover:bg-primary/5 transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <item.icon size={18} className="text-primary" />
+                <div className="group cursor-pointer rounded-xl border border-border bg-card p-3.5 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <item.icon size={16} className="text-primary" />
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">
@@ -84,12 +89,7 @@ export default function StudentPortal() {
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">{item.desc}</div>
                     </div>
-                    <motion.div
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ color: "#3B82F6" }}
-                    >
-                      →
-                    </motion.div>
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-primary text-sm">→</span>
                   </div>
                 </div>
               </Link>
@@ -106,7 +106,7 @@ export default function StudentPortal() {
           <SkillGraph
             passedCourses={passed}
             totalCourses={total}
-            enrollments={enrollments?.map(e => ({
+            enrollments={enrollments?.map((e: any) => ({
               courseName: e.courseName,
               grade:      e.grade,
             })) ?? []}
@@ -115,20 +115,12 @@ export default function StudentPortal() {
       </div>
 
       {/* Vanguard Leaderboard */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
         <VanguardLeaderboard />
       </motion.div>
 
       {/* Current Enrollments */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -138,7 +130,7 @@ export default function StudentPortal() {
           <CardContent>
             <div className="space-y-2.5">
               {enrollments?.length ? (
-                enrollments.map((enr, i) => (
+                enrollments.map((enr: any, i: number) => (
                   <motion.div
                     key={enr.id}
                     initial={{ opacity: 0, x: -10 }}
@@ -150,9 +142,9 @@ export default function StudentPortal() {
                     <span
                       className="font-mono text-sm font-bold px-2.5 py-0.5 rounded-full border"
                       style={{
-                        color:        enr.grade && enr.grade !== "Ongoing" ? "#60A5FA" : "hsl(var(--muted-foreground))",
-                        borderColor:  enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.3)" : "hsl(var(--border))",
-                        background:   enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.08)" : "transparent",
+                        color:       enr.grade && enr.grade !== "Ongoing" ? "#60A5FA" : "hsl(var(--muted-foreground))",
+                        borderColor: enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.3)" : "hsl(var(--border))",
+                        background:  enr.grade && enr.grade !== "Ongoing" ? "rgba(59,130,246,0.08)" : "transparent",
                       }}
                     >
                       {enr.grade || "Ongoing"}

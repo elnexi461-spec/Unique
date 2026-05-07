@@ -27,7 +27,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     location.startsWith("/verify/") ||
     location === "/" ||
     location === "/login" ||
-    location === "/register";
+    location === "/register" ||
+    location === "/onboarding";
 
   const { data: user, isLoading } = useGetMe({
     query: {

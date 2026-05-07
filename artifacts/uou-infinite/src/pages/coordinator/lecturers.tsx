@@ -9,7 +9,7 @@ export default function LecturersList() {
   const { data: lecturers, isLoading } = useListLecturers();
   const [search, setSearch] = useState("");
 
-  const filtered = lecturers?.filter(l => 
+  const filtered = lecturers?.filter((l: any) => 
     l.name.toLowerCase().includes(search.toLowerCase()) || 
     l.department.toLowerCase().includes(search.toLowerCase())
   );
@@ -47,7 +47,7 @@ export default function LecturersList() {
           <TableBody>
             {isLoading ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8">Loading data stream...</TableCell></TableRow>
-            ) : filtered?.map((lecturer) => (
+            ) : filtered?.map((lecturer: any) => (
               <TableRow key={lecturer.id}>
                 <TableCell className="font-medium text-primary">{lecturer.name}</TableCell>
                 <TableCell className="text-muted-foreground">{lecturer.email}</TableCell>

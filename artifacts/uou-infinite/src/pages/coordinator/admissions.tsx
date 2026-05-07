@@ -60,7 +60,7 @@ export default function AdmissionsPage() {
       </div>
 
       <div className="grid gap-4">
-        {admissions?.map((admission, i) => {
+        {admissions?.map((admission: any, i: number) => {
           let analysis: { recommendation?: string } | null = null;
           if (admission.analysisResult) {
             try {

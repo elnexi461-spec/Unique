@@ -102,7 +102,7 @@ export default function LecturerGrades() {
                     <SelectValue placeholder="Select course..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {courses?.map(c => (
+                    {courses?.map((c: any) => (
                       <SelectItem key={c.id} value={String(c.id)}>{c.code} — {c.title}</SelectItem>
                     ))}
                   </SelectContent>
@@ -115,7 +115,7 @@ export default function LecturerGrades() {
                     <SelectValue placeholder="Select student..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {students?.map(s => (
+                    {students?.map((s: any) => (
                       <SelectItem key={s.id} value={String(s.id)}>{s.name} ({s.studentId})</SelectItem>
                     ))}
                   </SelectContent>

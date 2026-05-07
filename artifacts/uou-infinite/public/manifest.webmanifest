@@ -1,0 +1,46 @@
+{
+  "name": "UOU Infinite | Digital Sovereign Campus",
+  "short_name": "UOU Infinite",
+  "description": "Unique Open University Institutional OS — AI-gated learning, Gold Card credentials, and Vanguard Guardian intelligence.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020B1A",
+  "theme_color": "#0070FF",
+  "lang": "en",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/uou-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/opengraph.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "label": "UOU Infinite — Digital Campus"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Student Portal",
+      "url": "/student",
+      "description": "Access your academic portal"
+    },
+    {
+      "name": "Live Timetable",
+      "url": "/student/timetable",
+      "description": "View your lecture schedule"
+    },
+    {
+      "name": "Vanguard Guardian",
+      "url": "/student/guardian",
+      "description": "AI diagnostics and personal support"
+    }
+  ]
+}

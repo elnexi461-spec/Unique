@@ -43,6 +43,10 @@ import Library from "@/pages/student/library";
 import StudentIDCard from "@/pages/student/idcard";
 import Appeals from "@/pages/student/appeals";
 import VanguardGuardian from "@/pages/student/guardian";
+import OnboardingPage from "@/pages/onboarding";
+import GoldCardVault from "@/pages/student/vault";
+import ScholarProfile from "@/pages/student/profile";
+import { AmbientParticles } from "@/components/AmbientParticles";
 
 import SystemHealth from "@/pages/admin/health";
 import VerifyPage from "@/pages/verify";
@@ -83,7 +87,10 @@ function Router() {
         <Route path="/student/idcard" component={StudentIDCard} />
         <Route path="/student/appeals" component={Appeals} />
         <Route path="/student/guardian" component={VanguardGuardian} />
+        <Route path="/student/vault" component={GoldCardVault} />
+        <Route path="/student/profile" component={ScholarProfile} />
 
+        <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/admin/health" component={SystemHealth} />
 
@@ -102,6 +109,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <ErrorBoundary>
             <AuthProvider>
+              <AmbientParticles />
               <AnnouncementTicker />
               <Router />
               <CommandMenu />

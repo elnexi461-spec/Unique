@@ -84,7 +84,7 @@ export default function SystemHealth() {
                 
                 <div className="mt-6 space-y-3">
                   <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Recommended Actions</h4>
-                  {health.suggestions.map((suggestion, i) => (
+                  {(health.suggestions as string[]).map((suggestion: string, i: number) => (
                     <div key={i} className="flex items-center justify-between p-3 rounded bg-background border border-border">
                       <span className="text-sm text-foreground">{suggestion}</span>
                       <Button size="sm" onClick={() => handleFix(suggestion)} className="bg-primary/20 text-primary hover:bg-primary/30">
@@ -104,7 +104,7 @@ export default function SystemHealth() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {logs?.map((log) => (
+                  {logs?.map((log: any) => (
                     <div key={log.id} className="p-3 rounded bg-background border border-destructive/30 border-l-2 border-l-destructive">
                       <div className="flex justify-between items-start mb-1">
                         <Badge variant="outline" className="text-destructive border-destructive/50 rounded uppercase text-[10px] px-1">{log.level}</Badge>

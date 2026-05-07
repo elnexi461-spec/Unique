@@ -320,3 +320,22 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after { inset: -1px; }
 }
+
+/* Gold Card vault shimmer */
+@keyframes gold-shimmer-card {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Typing cursor blink */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Rank badge pulse */
+@keyframes rank-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+  50%       { box-shadow: 0 0 24px rgba(245,158,11,0.8); }
+}

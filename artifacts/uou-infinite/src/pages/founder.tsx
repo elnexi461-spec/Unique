@@ -509,7 +509,7 @@ function AuditLogSection() {
             </p>
           </div>
         ) : (
-          <div className="max-h-[520px] overflow-y-auto divide-y" style={{ divideColor: "rgba(59,130,246,0.08)" }}>
+          <div className="max-h-[520px] overflow-y-auto divide-y divide-blue-500/10">
             {filtered.map((entry, i) => {
               const ts = new Date(entry.timestamp);
               const timeStr = ts.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -861,7 +861,7 @@ export default function FounderPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={courseDistribution} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="enrollmentCount">
-                          {courseDistribution.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                          {courseDistribution.map((_: any, i: number) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                         </Pie>
                         <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
                       </PieChart>
@@ -891,7 +891,7 @@ export default function FounderPage() {
               <CardHeader><CardTitle className="text-base">System Telemetry Log</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {recentActivity?.slice(0, 6).map((activity) => (
+                  {recentActivity?.slice(0, 6).map((activity: any) => (
                     <div key={activity.id}
                       className="flex items-center gap-4 p-3 rounded-lg border hover:border-primary/30 transition-colors"
                       style={{ background: "rgba(8,18,50,0.5)", borderColor: "rgba(59,130,246,0.12)" }}>

@@ -130,7 +130,7 @@ export default function StudentLecture() {
   const [, setLocation] = useLocation();
   const { data: courses } = useListCourses();
   const { user } = useAuth();
-  const course = courses?.find(c => String(c.id) === courseId);
+  const course = courses?.find((c: any) => String(c.id) === courseId);
 
   const [phase, setPhase] = useState<Phase>("recall");
   const [attempt, setAttempt] = useState(1);
