@@ -411,6 +411,7 @@ export default function CoordinatorUpload() {
                   <option value={3}>DIG-301</option>
                   <option value={4}>LAW-201</option>
                   <option value={5}>HSM-301</option>
+                  <option value={6}>BAM-111</option>
                 </select>
                 <motion.button
                   whileHover={{ scale: 1.02 }}

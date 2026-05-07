@@ -42,6 +42,7 @@ import FeeStatus from "@/pages/student/fees";
 import Library from "@/pages/student/library";
 import StudentIDCard from "@/pages/student/idcard";
 import Appeals from "@/pages/student/appeals";
+import VanguardGuardian from "@/pages/student/guardian";
 
 import SystemHealth from "@/pages/admin/health";
 import VerifyPage from "@/pages/verify";
@@ -81,6 +82,7 @@ function Router() {
         <Route path="/student/library" component={Library} />
         <Route path="/student/idcard" component={StudentIDCard} />
         <Route path="/student/appeals" component={Appeals} />
+        <Route path="/student/guardian" component={VanguardGuardian} />
 
         <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/admin/health" component={SystemHealth} />

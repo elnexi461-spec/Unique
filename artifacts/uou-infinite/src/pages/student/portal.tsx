@@ -2,7 +2,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useListEnrollments } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Award, Activity, TrendingUp, Calendar, Zap } from "lucide-react";
+import { BookOpen, Award, Activity, TrendingUp, Calendar, Zap, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { SkillGraph } from "@/components/SkillGraph";
@@ -16,10 +16,11 @@ export default function StudentPortal() {
   const total  = enrollments?.length ?? 0;
 
   const quickLinks = [
-    { href: "/student/grades",     icon: TrendingUp, label: "Grades & GPA",       desc: "AI-powered academic report" },
-    { href: "/student/timetable",  icon: Calendar,   label: "Live Timetable",      desc: "Lecture schedule & countdown" },
-    { href: "/student/courses",    icon: BookOpen,   label: "Course Browser",      desc: "Browse & enroll in courses" },
-    { href: "/student/credential", icon: Award,      label: "Credential Passport", desc: "Cryptographic proof of skill" },
+    { href: "/student/grades",     icon: TrendingUp, label: "Grades & GPA",         desc: "AI-powered academic report" },
+    { href: "/student/timetable",  icon: Calendar,   label: "Live Timetable",        desc: "Lecture schedule & countdown" },
+    { href: "/student/courses",    icon: BookOpen,   label: "Course Browser",        desc: "Browse & enroll in courses" },
+    { href: "/student/credential", icon: Award,      label: "Credential Passport",   desc: "Cryptographic proof of skill" },
+    { href: "/student/guardian",   icon: Brain,      label: "Vanguard Guardian",     desc: "AI diagnostics & private chat" },
   ];
 
   return (

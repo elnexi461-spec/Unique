@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +9,47 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useLogin } from "@workspace/api-client-react";
 import { setAuthToken } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Loader2, Lock, Mail } from "lucide-react";
+import { Shield, Loader2, Lock, Mail, GraduationCap, Users, BookOpen, ChevronRight } from "lucide-react";
+import { useState } from "react";
+
+const DEMO_QUICK_ACCESS = [
+  {
+    role: "student",
+    label: "Scholar",
+    icon: GraduationCap,
+    email: "demo.student@uou.edu.ng",
+    password: "Demo@1234",
+    color: "#0070FF",
+    desc: "Student dashboard",
+  },
+  {
+    role: "coordinator",
+    label: "Coordinator",
+    icon: Users,
+    email: "demo.coordinator@uou.edu.ng",
+    password: "Demo@1234",
+    color: "#34D399",
+    desc: "Operations hub",
+  },
+  {
+    role: "lecturer",
+    label: "Lecturer",
+    icon: BookOpen,
+    email: "prof.imumolen@uou.edu.ng",
+    password: "Demo@1234",
+    color: "#A78BFA",
+    desc: "Lecture portal",
+  },
+  {
+    role: "founder",
+    label: "Founder",
+    icon: Shield,
+    email: "admin.founder@uou.edu.ng",
+    password: "Demo@1234",
+    color: "#F59E0B",
+    desc: "War Room",
+  },
+];
 
 const loginSchema = z.object({
   email:    z.string().email("Invalid email address"),
@@ -20,6 +60,7 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { toast }        = useToast();
   const loginMutation    = useLogin();
+  const [activeRole, setActiveRole] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -41,6 +82,12 @@ export default function LoginPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleQuickAccess = (entry: typeof DEMO_QUICK_ACCESS[0]) => {
+    setActiveRole(entry.role);
+    form.setValue("email", entry.email);
+    form.setValue("password", entry.password);
   };
 
   return (
@@ -98,6 +145,75 @@ export default function LoginPage() {
           />
 
           <div className="p-8">
+
+            {/* Role Quick Access */}
+            <div className="mb-6">
+              <div className="text-[10px] font-bold tracking-[0.25em] uppercase text-muted-foreground mb-3 text-center">
+                Demo Quick Access
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {DEMO_QUICK_ACCESS.map(entry => {
+                  const Icon = entry.icon;
+                  const isActive = activeRole === entry.role;
+                  return (
+                    <motion.button
+                      key={entry.role}
+                      type="button"
+                      onClick={() => handleQuickAccess(entry)}
+                      whileHover={{ y: -2, scale: 1.04 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl border transition-all relative"
+                      style={{
+                        background: isActive ? `${entry.color}15` : "rgba(8,18,50,0.5)",
+                        borderColor: isActive ? `${entry.color}60` : "rgba(59,130,246,0.12)",
+                        boxShadow: isActive ? `0 0 12px ${entry.color}25` : "none",
+                      }}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="role-active-bg"
+                          className="absolute inset-0 rounded-xl"
+                          style={{ background: `${entry.color}08` }}
+                        />
+                      )}
+                      <Icon size={14} style={{ color: isActive ? entry.color : "rgba(148,163,184,0.6)" }} />
+                      <span className="text-[9px] font-bold uppercase tracking-wider leading-none"
+                        style={{ color: isActive ? entry.color : "rgba(148,163,184,0.7)" }}>
+                        {entry.label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+              <AnimatePresence>
+                {activeRole && (
+                  <motion.div
+                    key={activeRole}
+                    initial={{ opacity: 0, height: 0, y: -4 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-2 text-center"
+                  >
+                    <span className="text-[10px] text-muted-foreground">
+                      Credentials loaded ·{" "}
+                      <span style={{ color: DEMO_QUICK_ACCESS.find(e => e.role === activeRole)?.color }}>
+                        {DEMO_QUICK_ACCESS.find(e => e.role === activeRole)?.desc}
+                      </span>
+                      {" "}— click Authorize to enter
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1 h-px" style={{ background: "rgba(59,130,246,0.1)" }} />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">or enter manually</span>
+              <div className="flex-1 h-px" style={{ background: "rgba(59,130,246,0.1)" }} />
+            </div>
+
             {/* Logo + Title */}
             <div className="flex flex-col items-center mb-8">
               <motion.div

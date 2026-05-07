@@ -8,12 +8,12 @@ import { CinematicIntro } from "@/components/CinematicIntro";
 import { DemoPersonaSelector } from "@/pages/demo-persona";
 
 const NEWS = [
-  { id: 1, category: "AI Update",   title: "UOU Sentinel AI now tracks at-risk students in real time",             date: "May 2026" },
-  { id: 2, category: "Academic",    title: "Week 18 Friday Brief: Zaria Center achieves 15% punctuality surge",    date: "May 2026" },
-  { id: 3, category: "Technology",  title: "Cryptographic Proof of Attendance now live — 217 Gold Cards minted",   date: "Apr 2026" },
-  { id: 4, category: "Research",    title: "UOU partners with 12 research institutions across West Africa",        date: "Feb 2026" },
-  { id: 5, category: "Achievement", title: "Gold Card ceremony: 1,200 attendance proofs this semester",            date: "Jan 2026" },
-  { id: 6, category: "Innovation",  title: "Neural Ledger micro-learning engine reduces knowledge gap by 43%",     date: "Dec 2025" },
+  { id: 1, category: "Scholarship 2026",  title: "UOU announces 50 full-tuition scholarships for top Vanguard scholars — applications open now",  date: "May 2026" },
+  { id: 2, category: "Scholarship 2026",  title: "Merit-based Excellence Awards: ₦2.5M pool for highest Gold Card earners this semester",         date: "May 2026" },
+  { id: 3, category: "AI Update",         title: "Vanguard Guardian AI module launched — personal performance diagnostics for every scholar",      date: "May 2026" },
+  { id: 4, category: "Academic",          title: "Week 18 Friday Brief: Zaria Center achieves 15% punctuality surge under Sentinel optimisation", date: "May 2026" },
+  { id: 5, category: "Technology",        title: "Cryptographic Proof of Attendance live — 217 Gold Cards minted across 3 campuses",              date: "Apr 2026" },
+  { id: 6, category: "Scholarship 2026",  title: "Federal Government endorses UOU scholarship framework — 200 additional slots announced",        date: "Apr 2026" },
 ];
 
 const CAMPUS_CENTERS = [
@@ -179,21 +179,21 @@ export default function LandingPage() {
                 transition={{ delay: 0.7, duration: 0.5 }}
                 className="flex items-center justify-center gap-4 flex-wrap"
               >
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  onClick={() => setPhase("persona")} style={{ cursor: "pointer" }}>
-                  <Button size="lg" className="h-12 px-8 text-base font-semibold text-white"
-                    style={{ background: "linear-gradient(135deg, #0040C0, #0070FF)", boxShadow: "0 0 32px rgba(0,112,255,0.45)", border: "none" }}>
-                    <Zap size={16} className="mr-2" /> Demo Mode
-                  </Button>
-                </motion.div>
                 <Link href="/login">
                   <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                    <Button variant="outline" size="lg" className="h-12 px-8 text-base font-semibold"
-                      style={{ borderColor: "rgba(0,112,255,0.4)", color: B.electric }}>
-                      Sign In →
+                    <Button size="lg" className="h-12 px-8 text-base font-black text-white"
+                      style={{ background: "linear-gradient(135deg, #0040C0, #0070FF)", boxShadow: "0 0 32px rgba(0,112,255,0.45)", border: "none" }}>
+                      <Zap size={16} className="mr-2" /> Enter Digital Campus
                     </Button>
                   </motion.div>
                 </Link>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                  onClick={() => setPhase("persona")} style={{ cursor: "pointer" }}>
+                  <Button variant="outline" size="lg" className="h-12 px-8 text-base font-semibold"
+                    style={{ borderColor: "rgba(0,112,255,0.4)", color: B.electric }}>
+                    Demo Mode
+                  </Button>
+                </motion.div>
               </motion.div>
             </motion.div>
 
@@ -399,21 +399,21 @@ export default function LandingPage() {
                 Your institutional operating system is online and waiting.
               </p>
               <div className="flex items-center justify-center gap-4 flex-wrap">
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  onClick={() => setPhase("persona")} style={{ cursor: "pointer" }}>
-                  <Button size="lg" className="h-14 px-12 text-lg font-black text-white"
-                    style={{ background: "linear-gradient(135deg, #002080, #0040C0, #0070FF)", border: "1px solid rgba(0,112,255,0.3)" }}>
-                    <Zap size={18} className="mr-2" /> Enter Demo →
-                  </Button>
-                </motion.div>
                 <Link href="/login">
                   <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                    <Button variant="outline" size="lg" className="h-14 px-12 text-lg font-black"
-                      style={{ borderColor: "rgba(0,112,255,0.4)", color: B.electric }}>
-                      Sign In
+                    <Button size="lg" className="h-14 px-12 text-lg font-black text-white"
+                      style={{ background: "linear-gradient(135deg, #002080, #0040C0, #0070FF)", border: "1px solid rgba(0,112,255,0.3)", boxShadow: "0 0 48px rgba(0,112,255,0.4)" }}>
+                      <Zap size={18} className="mr-2" /> Enter Digital Campus
                     </Button>
                   </motion.div>
                 </Link>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                  onClick={() => setPhase("persona")} style={{ cursor: "pointer" }}>
+                  <Button variant="outline" size="lg" className="h-14 px-12 text-lg font-black"
+                    style={{ borderColor: "rgba(0,112,255,0.4)", color: B.electric }}>
+                    Demo Mode
+                  </Button>
+                </motion.div>
               </div>
             </motion.div>
           </section>

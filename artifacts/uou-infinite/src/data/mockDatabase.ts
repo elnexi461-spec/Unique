@@ -322,6 +322,69 @@ export const CORE_LECTURES = [
     quizQuestions: [],
   },
   {
+    id: "BAM-111",
+    code: "BAM-111",
+    title: "Business Administration & Management",
+    department: "Business & Entrepreneurship",
+    professor: "Professor Imumolen",
+    duration: "20 min",
+    slides: [
+      {
+        title: "Foundations of Business Administration",
+        content: "Business administration is the discipline of coordinating resources — human, financial, material, and informational — toward the achievement of organisational objectives. The administrator who cannot distinguish between efficiency (doing things right) and effectiveness (doing the right things) will optimise irrelevance. In the Nigerian context, administrative excellence is a competitive weapon in markets characterised by institutional uncertainty.",
+        keyPoints: ["Administrative functions: planning, organising, leading, controlling", "Efficiency vs. effectiveness: the strategic distinction", "Organisational environments in emerging markets"],
+        visual: "foundations",
+      },
+      {
+        title: "Organisational Structures & Design",
+        content: "Structure follows strategy — or it should. The organisational chart is not a hierarchy of importance; it is a map of information flows and decision rights. Nigerian businesses that replicate Western hierarchical models without contextual adaptation often create organisations with high coordination costs and slow adaptive capacity. The flat structure that works for a tech startup in Lagos will fail in a manufacturing conglomerate in Kano.",
+        keyPoints: ["Functional, divisional, and matrix structures", "Span of control and delegation principles", "Contextual design: adapting structure to environment"],
+        visual: "structure",
+      },
+      {
+        title: "Human Resource Management",
+        content: "People are the only resource that can appreciate in value. Every other asset depreciates — machines, buildings, technology. The strategic HR function transforms recruiting, training, and retention into competitive advantage. In Nigeria's labour market, the cost of talent misallocation is amplified by skills gaps across critical sectors — making internal development not a luxury but a strategic necessity.",
+        keyPoints: ["Job analysis and competency frameworks", "Performance management cycles", "Retention strategies in high-turnover environments"],
+        visual: "hrm",
+      },
+      {
+        title: "Financial Management Essentials",
+        content: "Cash is not profit. The most common cause of business failure in Nigeria is not poor strategy — it is poor cash flow management by organisations that appear profitable on paper. Understanding the difference between accrual accounting and cash reality, managing working capital, and using financial ratios as diagnostic tools are non-negotiable competencies for any administrator.",
+        keyPoints: ["Working capital cycle: receivables, payables, inventory", "Break-even analysis and contribution margin", "Key ratios: liquidity, profitability, leverage"],
+        visual: "finance",
+      },
+      {
+        title: "Strategic Planning & Execution",
+        content: "A strategy without an execution framework is a hallucination. The SWOT and PESTEL tools are entry points, not endpoints — they identify the strategic landscape but do not generate the decisions required to navigate it. The Balanced Scorecard translates strategic intent into operational metrics. The administrator's role is to close the gap between the board's vision and the front line's daily action.",
+        keyPoints: ["SWOT and PESTEL as diagnostic, not prescriptive tools", "Balanced Scorecard: four perspectives", "OKR frameworks for execution alignment"],
+        visual: "strategy",
+      },
+    ],
+    scriptSummary: "BAM-111 opens with the foundational distinction between efficiency and effectiveness — the most common source of administrative confusion. Organisational design is then examined through the lens of strategy-structure alignment, with attention to Nigerian contextual adaptation. Human resource management is framed as a value-appreciation engine. Financial management essentials ground administrators in cash-flow reality versus accounting reality. The session closes with strategic planning — specifically the translation of strategy into executable metrics through the Balanced Scorecard and OKR frameworks.",
+    quizQuestions: [
+      {
+        scenario: "A manufacturing firm in Kano has an operating profit margin of 18% but has been unable to pay suppliers for 60 days. The CEO insists the business is profitable. The most accurate assessment is:",
+        options: [
+          "The CEO is correct — profitability is the primary indicator of business health",
+          "The firm is profitable but cash-flow insolvent — profit is not cash",
+          "The suppliers are being unreasonable; 60-day terms are standard",
+          "The firm needs to raise its prices immediately",
+        ],
+        correctIndex: 1,
+      },
+      {
+        scenario: "A Lagos-based fintech startup with 12 employees adopts a rigid hierarchical organisational structure modelled on a multinational bank. Six months later, product releases slow by 60%. According to today's lecture, the root cause is most likely:",
+        options: [
+          "The team lacks the technical skills required",
+          "The structure creates high coordination costs and slow decision rights inappropriate for the strategy",
+          "The startup needs to hire more employees to handle the workload",
+          "The hierarchical model is universally optimal and another factor caused the slowdown",
+        ],
+        correctIndex: 1,
+      },
+    ],
+  },
+  {
     id: "HSM-301",
     code: "HSM-301",
     title: "Health Systems Management",
