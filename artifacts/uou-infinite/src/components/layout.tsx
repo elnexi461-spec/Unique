@@ -116,7 +116,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="p-5 border-b flex items-center gap-3" style={{ borderColor: "rgba(0,112,255,0.1)" }}>
           <Link href="/">
             <div className="flex items-center gap-2.5 cursor-pointer group">
-              <motion.img src="/uou-logo.png" alt="UOU"
+              <motion.img src={import.meta.env.BASE_URL + "uou-logo.png"} alt="UOU"
                 className="w-9 h-9 object-contain"
                 style={{ filter: "drop-shadow(0 0 8px rgba(0,112,255,0.5))" }}
                 whileHover={{ scale: 1.08 }}

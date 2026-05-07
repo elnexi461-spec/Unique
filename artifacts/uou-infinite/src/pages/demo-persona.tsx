@@ -128,7 +128,7 @@ export function DemoPersonaSelector({ onSkip }: DemoPersonaSelectorProps) {
           className="text-center mb-10"
         >
           <div className="flex justify-center mb-5">
-            <img src="/uou-logo.png" alt="UOU" className="w-16 h-16 object-contain"
+            <img src={import.meta.env.BASE_URL + "uou-logo.png"} alt="UOU" className="w-16 h-16 object-contain"
               style={{ filter: "drop-shadow(0 0 16px rgba(59,130,246,0.55))" }} />
           </div>
           <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.3em] uppercase mb-3 px-4 py-1.5 rounded-full border"

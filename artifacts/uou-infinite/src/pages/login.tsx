@@ -223,7 +223,7 @@ export default function LoginPage() {
                 style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.25)" }}
               >
                 <img
-                  src="/uou-logo.png"
+                  src={import.meta.env.BASE_URL + "uou-logo.png"}
                   alt="Unique Open University"
                   className="w-14 h-14 object-contain"
                   style={{ filter: "drop-shadow(0 0 10px rgba(59,130,246,0.5))" }}

@@ -32,7 +32,7 @@ function UOULogo({ size = 160, glow = true }: { size?: number; glow?: boolean })
         />
       )}
       <img
-        src="/uou-logo.png"
+        src={import.meta.env.BASE_URL + "uou-logo.png"}
         alt="UOU Logo"
         draggable={false}
         style={{

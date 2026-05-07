@@ -210,7 +210,7 @@ function HolographicCard({
             {/* Header row */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <img src="/uou-logo.png" alt="UOU"
+                <img src={import.meta.env.BASE_URL + "uou-logo.png"} alt="UOU"
                   className="w-8 h-8 object-contain"
                   style={{ filter: "drop-shadow(0 0 8px rgba(0,112,255,0.7))" }} />
                 <div>

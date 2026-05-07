@@ -126,7 +126,7 @@ export default function LandingPage() {
                 transition={{ duration: 3, repeat: Infinity }}
                 className="w-24 h-24 mx-auto mb-8 cursor-default"
               >
-                <img src="/uou-logo.png" alt="Unique Open University" className="w-full h-full object-contain"
+                <img src={import.meta.env.BASE_URL + "uou-logo.png"} alt="Unique Open University" className="w-full h-full object-contain"
                   style={{ filter: "drop-shadow(0 0 18px rgba(0,112,255,0.55))" }} />
               </motion.div>
 

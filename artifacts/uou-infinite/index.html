@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>UOU Infinite</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      // Restore path encoded by 404.html (GitHub Pages SPA routing)
+      (function () {
+        var m = /[?&]p=(\/[^&]*)/.exec(window.location.search);
+        if (m) {
+          var path  = decodeURIComponent(m[1].replace(/~and~/g, '&'));
+          var query = window.location.search
+            .replace(/[?&]p=\/[^&]*/,  '')
+            .replace(/[?&]q=([^&]*)/, function (_, q) {
+              return '?' + decodeURIComponent(q.replace(/~and~/g, '&'));
+            })
+            .replace(/^&/, '?');
+          window.history.replaceState(
+            null, null,
+            path + query + window.location.hash
+          );
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
