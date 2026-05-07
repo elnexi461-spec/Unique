@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, studentsTable, lecturersTable, coursesTable, enrollmentsTable, lectureKeys } from "@workspace/db";
+import { db, usersTable, studentsTable, lecturersTable, coursesTable, enrollmentsTable, lectureKeys, timetable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import crypto from "crypto";
 
@@ -87,6 +87,15 @@ const COURSES_DATA = [
     capacity: 75,
     requiredSubjects: "Public Health Fundamentals",
   },
+  {
+    title: "Business Administration & Management",
+    code: "BAM-111",
+    department: "Business & Entrepreneurship",
+    description: "Foundations of administrative theory, organisational design, HR management, financial essentials, and strategic execution.",
+    credits: 3,
+    capacity: 110,
+    requiredSubjects: "None",
+  },
 ];
 
 const DEMO_USERS = [
@@ -100,7 +109,7 @@ const DEMO_USERS = [
 router.post("/seed", async (_req, res): Promise<void> => {
   try {
     const report: Record<string, number> = {
-      demoUsers: 0, students: 0, courses: 0, enrollments: 0, goldCards: 0, lecturers: 0,
+      demoUsers: 0, students: 0, courses: 0, enrollments: 0, goldCards: 0, lecturers: 0, timetable: 0,
     };
 
     /* ── 1. Demo users ── */
@@ -148,6 +157,30 @@ router.post("/seed", async (_req, res): Promise<void> => {
         courseIds.push(created!.id);
         report.courses++;
       }
+    }
+
+    /* ── 3b. Timetable slots ── */
+    const [{ count: existingTimetable }] = await db.select({ count: count() }).from(timetable);
+    if (Number(existingTimetable) === 0 && courseIds.length >= 6) {
+      // courseIds[0]=ENT-101, [1]=AI-201, [2]=DIG-301, [3]=LAW-201, [4]=HSM-301, [5]=BAM-111
+      const slots = [
+        { courseId: courseIds[0]!, dayOfWeek: 1, startTime: "09:00", endTime: "11:00", hallLocation: "Hall A1 — Zaria", isOnline: false, semester: "2025/2026" },
+        { courseId: courseIds[0]!, dayOfWeek: 3, startTime: "14:00", endTime: "16:00", hallLocation: "Hall A1 — Lagos", isOnline: false, semester: "2025/2026" },
+        { courseId: courseIds[1]!, dayOfWeek: 2, startTime: "10:00", endTime: "12:00", hallLocation: null, meetLink: "https://meet.google.com/uou-ai201", isOnline: true, semester: "2025/2026" },
+        { courseId: courseIds[1]!, dayOfWeek: 4, startTime: "09:00", endTime: "11:00", hallLocation: null, meetLink: "https://meet.google.com/uou-ai201-b", isOnline: true, semester: "2025/2026" },
+        { courseId: courseIds[2]!, dayOfWeek: 2, startTime: "14:00", endTime: "16:00", hallLocation: "Innovation Lab C3", isOnline: false, semester: "2025/2026" },
+        { courseId: courseIds[2]!, dayOfWeek: 5, startTime: "10:00", endTime: "12:00", hallLocation: "Innovation Lab C3 — Kano", isOnline: false, semester: "2025/2026" },
+        { courseId: courseIds[3]!, dayOfWeek: 3, startTime: "09:00", endTime: "11:00", hallLocation: "Moot Court A2", isOnline: false, semester: "2025/2026" },
+        { courseId: courseIds[4]!, dayOfWeek: 4, startTime: "14:00", endTime: "16:00", hallLocation: null, meetLink: "https://meet.google.com/uou-hsm301", isOnline: true, semester: "2025/2026" },
+        { courseId: courseIds[5]!, dayOfWeek: 1, startTime: "13:00", endTime: "15:00", hallLocation: "Hall B1 — Zaria", isOnline: false, semester: "2025/2026" },
+        { courseId: courseIds[5]!, dayOfWeek: 4, startTime: "11:00", endTime: "13:00", hallLocation: "Hall B1 — Lagos", isOnline: false, semester: "2025/2026" },
+      ];
+      for (const slot of slots) {
+        await db.insert(timetable).values(slot);
+      }
+      report.timetable = slots.length;
+    } else {
+      report.timetable = Number(existingTimetable);
     }
 
     /* ── 4. Demo student (Amara) ── */

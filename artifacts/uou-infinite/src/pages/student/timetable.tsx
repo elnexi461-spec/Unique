@@ -62,7 +62,7 @@ export default function StudentTimetable() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={`rounded-xl border p-4 transition-all ${slot.isLive ? "border-primary/60 bg-primary/5" : "border-border bg-card"}`}
-      style={slot.isLive ? { boxShadow: "0 0 20px rgba(100,255,218,0.1)" } : {}}
+      style={slot.isLive ? { boxShadow: "0 0 20px rgba(0,112,255,0.18)" } : {}}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
