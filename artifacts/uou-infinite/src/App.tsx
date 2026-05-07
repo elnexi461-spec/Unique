@@ -36,6 +36,12 @@ import StudentCredential from "@/pages/student/credential";
 import StudentGrades from "@/pages/student/grades";
 import StudentTimetable from "@/pages/student/timetable";
 import StudentLecture from "@/pages/student/lecture";
+import AcademicCalendar from "@/pages/student/calendar";
+import Notifications from "@/pages/student/notifications";
+import FeeStatus from "@/pages/student/fees";
+import Library from "@/pages/student/library";
+import StudentIDCard from "@/pages/student/idcard";
+import Appeals from "@/pages/student/appeals";
 
 import SystemHealth from "@/pages/admin/health";
 import VerifyPage from "@/pages/verify";
@@ -69,6 +75,12 @@ function Router() {
         <Route path="/student/grades" component={StudentGrades} />
         <Route path="/student/timetable" component={StudentTimetable} />
         <Route path="/student/lecture/:courseId" component={StudentLecture} />
+        <Route path="/student/calendar" component={AcademicCalendar} />
+        <Route path="/student/notifications" component={Notifications} />
+        <Route path="/student/fees" component={FeeStatus} />
+        <Route path="/student/library" component={Library} />
+        <Route path="/student/idcard" component={StudentIDCard} />
+        <Route path="/student/appeals" component={Appeals} />
 
         <Route path="/verify/:token" component={VerifyPage} />
         <Route path="/admin/health" component={SystemHealth} />
