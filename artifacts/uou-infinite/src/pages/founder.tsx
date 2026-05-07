@@ -9,8 +9,10 @@ import {
   Users, BookOpen, GraduationCap, AlertTriangle, Activity, Zap, RefreshCw,
   Upload, Megaphone, Loader2, CheckCircle, Radio, Shield, TrendingUp,
   TrendingDown, Award, MapPin, Brain, Star, Database, UserPlus, Copy, X,
-  Search, Trophy, Lock, FileText, Clock, Filter,
+  Search, Trophy, Lock, FileText, Clock, Filter, BarChart2,
 } from "lucide-react";
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
+import { UserActivityService } from "@/lib/UserActivityService";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip,
   ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar,
@@ -567,6 +569,116 @@ function AuditLogSection() {
   );
 }
 
+/* ── Activity Role Summary ──────────────────────────────────────────────────── */
+function ActivityRoleSummary() {
+  const [summary, setSummary] = useState<Record<string, number>>({});
+  const [typeSummary, setTypeSummary] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const refresh = () => {
+      setSummary(UserActivityService.getSummaryByRole());
+      setTypeSummary(UserActivityService.getSummaryByType());
+    };
+    refresh();
+    const id = setInterval(refresh, 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  const totalEvents = Object.values(summary).reduce((a, b) => a + b, 0);
+
+  const roleColors: Record<string, string> = {
+    founder:     "#F59E0B",
+    coordinator: "#34D399",
+    lecturer:    "#A78BFA",
+    student:     "#60A5FA",
+  };
+
+  const typeLabels: Record<string, string> = {
+    lecture_view:   "Lectures Viewed",
+    slide_view:     "Slides Completed",
+    quiz_complete:  "Quizzes",
+    gold_card_mint: "Gold Cards Minted",
+    pdf_upload:     "PDF Uploads",
+    login:          "Logins",
+    button_click:   "Actions",
+    page_visit:     "Page Visits",
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Headline stat */}
+      <div className="rounded-2xl border p-5"
+        style={{ background: "rgba(4,11,36,0.88)", borderColor: "rgba(59,130,246,0.25)" }}>
+        <div className="text-[10px] font-bold tracking-[0.3em] uppercase mb-1"
+          style={{ color: "rgba(96,165,250,0.6)" }}>
+          Institutional Telemetry
+        </div>
+        <div className="flex items-end gap-3">
+          <div className="text-5xl font-black text-white">{totalEvents.toLocaleString()}</div>
+          <div className="text-muted-foreground text-sm pb-1.5">total events tracked across all sessions</div>
+        </div>
+      </div>
+
+      {/* By role */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {["founder", "coordinator", "lecturer", "student"].map(role => {
+          const count = summary[role] || 0;
+          const color = roleColors[role] ?? "#60A5FA";
+          const pct = totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0;
+          return (
+            <motion.div
+              key={role}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl border p-4 relative overflow-hidden"
+              style={{ background: "rgba(8,18,50,0.7)", borderColor: `${color}30` }}
+            >
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: `radial-gradient(circle at 80% 20%, ${color}10, transparent 60%)` }} />
+              <div className="text-[9px] font-bold uppercase tracking-[0.25em] mb-1" style={{ color }}>
+                {role}
+              </div>
+              <div className="text-3xl font-black text-white">{count}</div>
+              <div className="text-[10px] text-muted-foreground mt-1">{pct}% of total</div>
+              <div className="mt-2 h-1 rounded-full overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.06)" }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: color }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                />
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* By event type */}
+      <div className="rounded-2xl border p-5"
+        style={{ background: "rgba(4,11,36,0.88)", borderColor: "rgba(59,130,246,0.18)" }}>
+        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
+          <BarChart2 size={13} className="text-primary" /> Event Type Breakdown
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {Object.entries(typeLabels).map(([type, label]) => {
+            const count = typeSummary[type] || 0;
+            return (
+              <div key={type}
+                className="rounded-lg border p-3"
+                style={{ background: "rgba(8,18,50,0.6)", borderColor: "rgba(59,130,246,0.12)" }}>
+                <div className="text-xl font-black" style={{ color: BRAND.electric }}>{count}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{label}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────────── */
 export default function FounderPage() {
   const { data: overview }          = useGetDashboardOverview();
@@ -577,7 +689,7 @@ export default function FounderPage() {
   const { token }                   = useAuth();
   const { toast }                   = useToast();
 
-  const [activeTab, setActiveTab] = useState<"brief" | "analytics" | "scout" | "registry" | "controls" | "audit">("brief");
+  const [activeTab, setActiveTab] = useState<"brief" | "analytics" | "scout" | "registry" | "controls" | "audit" | "activity">("brief");
 
   /* Controls state */
   const [redSwitchActive, setRedSwitchActive] = useState(false);
@@ -728,6 +840,7 @@ export default function FounderPage() {
     { id: "registry", label: "Registry",    icon: UserPlus },
     { id: "controls", label: "Controls",    icon: Shield },
     { id: "audit",    label: "Audit Log",   icon: FileText },
+    { id: "activity", label: "Activity",    icon: BarChart2 },
   ] as const;
 
   return (
@@ -1414,6 +1527,25 @@ export default function FounderPage() {
             className="space-y-4">
 
             <AuditLogSection />
+          </motion.div>
+        )}
+
+        {/* ── ACTIVITY LEDGER ── */}
+        {activeTab === "activity" && (
+          <motion.div key="activity"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.35 }}
+            className="space-y-4">
+
+            {/* Role summary cards */}
+            <ActivityRoleSummary />
+
+            {/* Full activity feed — all roles */}
+            <RecentActivityFeed
+              maxItems={30}
+              title="Total Activity Across All Roles"
+              showRole
+            />
           </motion.div>
         )}
 

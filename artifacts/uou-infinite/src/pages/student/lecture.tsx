@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { SentinelPlayer } from "@/components/SentinelPlayer";
@@ -8,6 +8,8 @@ import { RemedialBridge } from "@/components/RemedialBridge";
 import { ArrowLeft, Shield, Brain, ChevronRight, AlertTriangle, Heart } from "lucide-react";
 import { useListCourses } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth-context";
+import { UserActivityService } from "@/lib/UserActivityService";
+import { useToast } from "@/hooks/use-toast";
 
 type Phase = "recall" | "lecture" | "portal_zoom" | "quiz" | "remedial" | "gold_card" | "complete";
 
@@ -34,21 +36,16 @@ function saveToVault(userId: string | number, entry: {
   }
 }
 
-/** Reads the mock fee ledger and returns true if any payment is overdue */
 function useFeeClearanceStatus(userId: string): { overdue: boolean; overdueAmount: number } {
   const [status, setStatus] = useState({ overdue: false, overdueAmount: 0 });
 
   useEffect(() => {
-    // Check localStorage for paid fees
     const paidKey = `uou_fees_paid_${userId}`;
     const paid: string[] = JSON.parse(localStorage.getItem(paidKey) || "[]");
-
-    // Pending fees from the mock ledger
     const pendingFees = [
       { ref: "UOU-PAY-2026-0488", amount: 85000, due: "May 15, 2026", overdue: true },
       { ref: "UOU-PAY-2026-0489", amount:  7500, due: "May 20, 2026", overdue: false },
     ];
-
     const overdueFees = pendingFees.filter(f => f.overdue && !paid.includes(f.ref));
     const total = overdueFees.reduce((s, f) => s + f.amount, 0);
     setStatus({ overdue: overdueFees.length > 0, overdueAmount: total });
@@ -72,20 +69,15 @@ function FeeWarningBanner({ amount }: { amount: number }) {
         className="rounded-2xl border overflow-hidden relative"
         style={{ background: "rgba(2,8,20,0.92)", borderColor: "rgba(245,158,11,0.35)" }}
       >
-        {/* Subtle gold pulse gradient */}
         <motion.div
           animate={{ opacity: [0.06, 0.16, 0.06] }}
           transition={{ duration: 2.8, repeat: Infinity }}
           className="absolute inset-0 pointer-events-none"
           style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.18) 0%, transparent 60%)" }}
         />
-
-        {/* Top stripe */}
         <div className="h-0.5 w-full"
           style={{ background: "linear-gradient(90deg, rgba(245,158,11,0), #F59E0B, rgba(245,158,11,0))" }} />
-
         <div className="px-5 py-3 relative z-10 flex items-start gap-4">
-          {/* Heartbeat icon */}
           <div className="shrink-0 mt-0.5">
             <motion.div
               animate={{ scale: [1, 1.25, 1], opacity: [0.8, 1, 0.8] }}
@@ -94,7 +86,6 @@ function FeeWarningBanner({ amount }: { amount: number }) {
               <Heart size={16} style={{ color: "#F59E0B" }} fill="rgba(245,158,11,0.25)" />
             </motion.div>
           </div>
-
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: "#F59E0B" }}>
@@ -112,7 +103,6 @@ function FeeWarningBanner({ amount }: { amount: number }) {
               Please clear your balance at your earliest convenience.
             </p>
           </div>
-
           <button
             onClick={() => setDismissed(true)}
             className="shrink-0 p-1 text-muted-foreground hover:text-white transition-colors mt-0.5"
@@ -130,19 +120,48 @@ export default function StudentLecture() {
   const [, setLocation] = useLocation();
   const { data: courses } = useListCourses();
   const { user } = useAuth();
+  const { toast } = useToast();
   const course = courses?.find((c: any) => String(c.id) === courseId);
 
   const [phase, setPhase] = useState<Phase>("recall");
   const [attempt, setAttempt] = useState(1);
   const [goldCardData, setGoldCardData] = useState<GoldCardData | null>(null);
+  const loggedLectureView = useRef(false);
 
   const courseTitle = course?.title || "Principles of Entrepreneurship";
   const studentName = user?.name || "Scholar";
   const studentId   = String(user?.id || "stu-001");
+  const userEmail   = user?.email || "unknown@uou.edu.ng";
+  const userRole    = user?.role  || "student";
 
   const { overdue, overdueAmount } = useFeeClearanceStatus(studentId);
 
+  const logActivity = (
+    type: Parameters<typeof UserActivityService.log>[0]["type"],
+    label: string,
+    metadata?: Record<string, unknown>
+  ) => {
+    UserActivityService.log({ type, label, email: userEmail, role: userRole, metadata });
+  };
+
+  const syncToast = () => {
+    toast({
+      title: "Activity Synced to Institutional Ledger",
+      description: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+    });
+  };
+
+  useEffect(() => {
+    if (!loggedLectureView.current && courseTitle && userEmail) {
+      loggedLectureView.current = true;
+      logActivity("lecture_view", `${studentName} viewed ${courseTitle} Lecture`, { courseId, courseTitle });
+      syncToast();
+    }
+  }, [courseTitle, userEmail]);
+
   const handleLectureEnd = () => {
+    logActivity("slide_view", `${studentName} completed all slides for ${courseTitle}`, { courseId, courseTitle });
+    syncToast();
     setPhase("portal_zoom");
     setTimeout(() => setPhase("quiz"), 1600);
   };
@@ -155,11 +174,15 @@ export default function StudentLecture() {
       privateKey,
       mintedAt: new Date().toISOString(),
     });
+    logActivity("quiz_complete", `${studentName} passed ${courseTitle} assessment — ${grade} (${score}%)`, { courseId, courseTitle, score, grade });
+    logActivity("gold_card_mint", `Gold Card minted: ${courseTitle} — ${grade}`, { courseId, courseTitle, score, grade });
+    syncToast();
     setGoldCardData({ score, grade, privateKey });
     setPhase("gold_card");
   };
 
   const handleQuizFail = (failedAttempt: number) => {
+    logActivity("quiz_complete", `${studentName} failed ${courseTitle} attempt ${failedAttempt}`, { courseId, courseTitle, attempt: failedAttempt });
     if (failedAttempt >= 3) {
       setPhase("remedial");
     } else {
@@ -183,7 +206,6 @@ export default function StudentLecture() {
 
   return (
     <div className="space-y-4">
-      {/* Nav */}
       <div className="flex items-center gap-4 flex-wrap">
         <motion.button
           whileHover={{ x: -2, scale: 1.02 }}
@@ -213,7 +235,6 @@ export default function StudentLecture() {
         </div>
       </div>
 
-      {/* Fee clearance banner — shown only if overdue */}
       {overdue && <FeeWarningBanner amount={overdueAmount} />}
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
@@ -227,7 +248,6 @@ export default function StudentLecture() {
 
         <AnimatePresence mode="wait">
 
-          {/* RECALL */}
           {phase === "recall" && (
             <motion.div key="recall"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -285,7 +305,10 @@ export default function StudentLecture() {
                   </div>
                 </motion.div>
                 <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  onClick={() => setPhase("lecture")}
+                  onClick={() => {
+                    logActivity("slide_view", `${studentName} started ${courseTitle} lecture slides`, { courseId, courseTitle });
+                    setPhase("lecture");
+                  }}
                   className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg, #0040C0, #0070FF)", color: "white", boxShadow: "0 0 24px rgba(0,112,255,0.35)" }}>
                   Begin Today's Lecture <ChevronRight size={16} />
@@ -294,7 +317,6 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* LECTURE */}
           {phase === "lecture" && (
             <motion.div key="lecture"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -320,7 +342,6 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* PORTAL ZOOM */}
           {phase === "portal_zoom" && (
             <motion.div
               key="portal_zoom"
@@ -349,7 +370,6 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* QUIZ */}
           {phase === "quiz" && (
             <motion.div key="quiz"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -366,7 +386,6 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* REMEDIAL */}
           {phase === "remedial" && (
             <motion.div key="remedial"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -375,7 +394,6 @@ export default function StudentLecture() {
             </motion.div>
           )}
 
-          {/* COMPLETE */}
           {phase === "complete" && (
             <motion.div key="complete"
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -398,7 +416,6 @@ export default function StudentLecture() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Gold Card overlay */}
       <AnimatePresence>
         {phase === "gold_card" && goldCardData && (
           <GoldCard

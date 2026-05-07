@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { SkillGraph } from "@/components/SkillGraph";
 import { VanguardLeaderboard } from "@/components/VanguardLeaderboard";
 import { StudyStreak } from "@/components/StudyStreak";
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 
 export default function StudentPortal() {
   const { user } = useAuth();
@@ -113,6 +114,15 @@ export default function StudentPortal() {
           />
         </motion.div>
       </div>
+
+      {/* Recent Activity Feed */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+        <RecentActivityFeed
+          email={(user as any)?.email}
+          maxItems={6}
+          title="Recent Activity"
+        />
+      </motion.div>
 
       {/* Vanguard Leaderboard */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>

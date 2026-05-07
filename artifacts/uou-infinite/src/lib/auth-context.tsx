@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { User } from "@workspace/api-client-react";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
-import { getAuthToken, clearAuthToken } from "./auth";
+import { getAuthToken, clearAuthToken, getGodModeUser, clearGodModeUser } from "./auth";
 import { useLocation } from "wouter";
 
 interface AuthContextType {
@@ -23,6 +23,11 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const token = getAuthToken();
+  const [godUser, setGodUser] = useState<User | null>(() => {
+    const g = getGodModeUser();
+    return g ? (g as unknown as User) : null;
+  });
+
   const isPublicRoute =
     location.startsWith("/verify/") ||
     location === "/" ||
@@ -30,27 +35,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     location === "/register" ||
     location === "/onboarding";
 
-  const { data: user, isLoading } = useGetMe({
+  const { data: apiUser, isLoading } = useGetMe({
     query: {
-      enabled: !!token,
+      enabled: !!token && !godUser,
       retry: false,
       queryKey: getGetMeQueryKey(),
     },
   });
 
+  const user = godUser ?? (apiUser || null);
+  const loading = godUser ? false : isLoading;
+
   useEffect(() => {
-    if (!isLoading && !user && !isPublicRoute) {
+    const g = getGodModeUser();
+    if (g) setGodUser(g as unknown as User);
+  }, [location]);
+
+  useEffect(() => {
+    if (!loading && !user && !isPublicRoute) {
       setLocation("/login");
     }
-  }, [user, isLoading, location, setLocation, isPublicRoute]);
+  }, [user, loading, location, setLocation, isPublicRoute]);
 
   const logout = () => {
     clearAuthToken();
+    clearGodModeUser();
+    setGodUser(null);
     setLocation("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user: user || null, token, isLoading, logout }}>
+    <AuthContext.Provider value={{ user: user || null, token, isLoading: loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

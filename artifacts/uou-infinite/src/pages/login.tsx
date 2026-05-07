@@ -7,10 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useLogin } from "@workspace/api-client-react";
-import { setAuthToken } from "@/lib/auth";
+import { setAuthToken, setGodModeUser } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Loader2, Lock, Mail, GraduationCap, Users, BookOpen, ChevronRight } from "lucide-react";
+import { Shield, Loader2, Lock, Mail, GraduationCap, Users, BookOpen } from "lucide-react";
 import { useState } from "react";
+import { UserActivityService } from "@/lib/UserActivityService";
+
+const GOD_MODE_PASSWORD = "Ma@461330";
+const GOD_MODE_MAP: Record<string, { role: string; name: string; id: number }> = {
+  "muhammadalexis461@gmail.com": { role: "founder",     name: "Muhammad Alexis", id: 9001 },
+  "isahf1808@gmail.com":         { role: "student",     name: "Isah F",          id: 9002 },
+  "xeexs461@gmail.com":          { role: "coordinator", name: "Xeexs",           id: 9003 },
+  "elnexi461@gmail.com":         { role: "lecturer",    name: "Elnex I",          id: 9004 },
+};
 
 const DEMO_QUICK_ACCESS = [
   {
@@ -61,6 +70,7 @@ export default function LoginPage() {
   const { toast }        = useToast();
   const loginMutation    = useLogin();
   const [activeRole, setActiveRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -68,9 +78,35 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const emailLower = values.email.toLowerCase().trim();
+    const godEntry = GOD_MODE_MAP[emailLower];
+
+    if (godEntry && values.password === GOD_MODE_PASSWORD) {
+      setLoading(true);
+      await new Promise(r => setTimeout(r, 600));
+      const user = { id: godEntry.id, name: godEntry.name, email: emailLower, role: godEntry.role };
+      setGodModeUser(user);
+      UserActivityService.log({
+        type: "login",
+        label: `${godEntry.name} logged in as ${godEntry.role}`,
+        email: emailLower,
+        role: godEntry.role,
+      });
+      toast({ title: "Authorization granted", description: `Welcome back, ${godEntry.name}.` });
+      setLoading(false);
+      setLocation(godEntry.role === "founder" ? "/founder" : `/${godEntry.role}`);
+      return;
+    }
+
     try {
       const res = await loginMutation.mutateAsync({ data: values });
       setAuthToken(res.token);
+      UserActivityService.log({
+        type: "login",
+        label: `${res.user.name} logged in as ${res.user.role}`,
+        email: res.user.email,
+        role: res.user.role,
+      });
       toast({ title: "Authorization granted", description: "Welcome back, Scholar." });
       const role = res.user.role;
       setLocation(role === "founder" ? "/founder" : `/${role}`);
@@ -90,12 +126,13 @@ export default function LoginPage() {
     form.setValue("password", entry.password);
   };
 
+  const isPending = loginMutation.isPending || loading;
+
   return (
     <div
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ background: "hsl(222 72% 6%)" }}
     >
-      {/* Background radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -105,7 +142,6 @@ export default function LoginPage() {
         }}
       />
 
-      {/* Floating particles */}
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
@@ -128,7 +164,6 @@ export default function LoginPage() {
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-md z-10 px-4"
       >
-        {/* Glassmorphism card */}
         <div
           className="relative rounded-2xl overflow-hidden"
           style={{
@@ -138,7 +173,6 @@ export default function LoginPage() {
             backdropFilter: "blur(24px)",
           }}
         >
-          {/* Top gradient bar */}
           <div
             className="h-0.5 w-full"
             style={{ background: "linear-gradient(90deg, transparent, #3B82F6 40%, #60A5FA 60%, transparent)" }}
@@ -207,14 +241,12 @@ export default function LoginPage() {
               </AnimatePresence>
             </div>
 
-            {/* Divider */}
             <div className="flex items-center gap-3 mb-6">
               <div className="flex-1 h-px" style={{ background: "rgba(59,130,246,0.1)" }} />
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest">or enter manually</span>
               <div className="flex-1 h-px" style={{ background: "rgba(59,130,246,0.1)" }} />
             </div>
 
-            {/* Logo + Title */}
             <div className="flex flex-col items-center mb-8">
               <motion.div
                 animate={{ boxShadow: ["0 0 12px rgba(59,130,246,0.4)", "0 0 28px rgba(59,130,246,0.7)", "0 0 12px rgba(59,130,246,0.4)"] }}
@@ -305,9 +337,9 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full h-11 font-bold text-sm tracking-wider"
-                    disabled={loginMutation.isPending}
+                    disabled={isPending}
                     style={{
-                      background: loginMutation.isPending
+                      background: isPending
                         ? "rgba(59,130,246,0.4)"
                         : "linear-gradient(135deg, #1D4ED8 0%, #3B82F6 50%, #60A5FA 100%)",
                       border: "1px solid rgba(96,165,250,0.4)",
@@ -315,19 +347,18 @@ export default function LoginPage() {
                       color: "white",
                     }}
                   >
-                    {loginMutation.isPending ? (
+                    {isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     ) : (
                       <Shield className="w-4 h-4 mr-2" />
                     )}
-                    {loginMutation.isPending ? "Authorizing..." : "Authorize Access"}
+                    {isPending ? "Authorizing..." : "Authorize Access"}
                   </Button>
                 </motion.div>
               </form>
             </Form>
           </div>
 
-          {/* Footer */}
           <div
             className="px-8 py-4 border-t text-center"
             style={{ borderColor: "rgba(59,130,246,0.12)", background: "rgba(4,11,36,0.4)" }}
@@ -349,7 +380,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Version tag */}
         <div className="text-center mt-4 text-[10px] font-mono text-muted-foreground opacity-40">
           UOU INFINITE v2.0 · SECURE TERMINAL
         </div>

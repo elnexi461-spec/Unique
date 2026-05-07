@@ -190,7 +190,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-white truncate">{user.name}</div>
-              <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color }}>
+              <div className="text-[10px] font-mono truncate" style={{ color: "rgba(148,163,184,0.6)" }}>
+                {(user as any).email || ""}
+              </div>
+              <div className="text-[9px] font-mono uppercase tracking-wider mt-0.5" style={{ color }}>
                 {roleLabel[user.role] ?? user.role}
               </div>
             </div>
