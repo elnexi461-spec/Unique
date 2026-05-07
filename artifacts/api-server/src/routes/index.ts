@@ -19,6 +19,7 @@ import systemRouter from "./system";
 import importRouter from "./import";
 import seedRouter from "./seed";
 import provisionRouter from "./provision";
+import heygenRouter from "./heygen";
 
 const router: IRouter = Router();
 
@@ -42,5 +43,6 @@ router.use(systemRouter);
 router.use(importRouter);
 router.use(seedRouter);
 router.use(provisionRouter);
+router.use(heygenRouter);
 
 export default router;
