@@ -4,9 +4,10 @@ import { CORE_LECTURES } from "@/data/mockDatabase";
 import { WhiteboardCanvas } from "@/components/WhiteboardCanvas";
 import { SubtitleOverlay, type SubtitleCue } from "@/components/SubtitleOverlay";
 import { useAuth } from "@/lib/auth-context";
+import { useLectureTTS } from "@/lib/useLectureTTS";
 import {
   ChevronRight, Cpu, Rocket, ShieldCheck, Wifi, WifiOff,
-  Loader2, Video, Brain, Lock, CheckCircle,
+  Loader2, Video, Brain, Lock, CheckCircle, Volume2, VolumeX,
 } from "lucide-react";
 
 interface SentinelPlayerProps {
@@ -193,6 +194,12 @@ export function SentinelPlayer({ courseId, onEnded }: SentinelPlayerProps) {
   const [showExamButton, setShowExamButton] = useState(false);
   const [examCountdown, setExamCountdown] = useState(3);
   const [examReady, setExamReady] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+
+  /* ── Nigerian TTS Voice ── */
+  const { speak, stop: stopTTS, supported: ttsSupported } = useLectureTTS();
+  const lastSpokenSegRef = useRef(-1);
+  const lastSpokenPointRef = useRef(-1);
 
   /* ── Video tracking ── */
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -375,6 +382,31 @@ export function SentinelPlayer({ courseId, onEnded }: SentinelPlayerProps) {
     return () => clearTimeout(t);
   }, [examReady, examCountdown]);
 
+  /* ── TTS: speak slide title when segment changes ── */
+  useEffect(() => {
+    if (!voiceEnabled || !ttsSupported || phase !== "offline") return;
+    if (currentSegment === lastSpokenSegRef.current) return;
+    lastSpokenSegRef.current = currentSegment;
+    lastSpokenPointRef.current = -1;
+    const slide = slides[currentSegment];
+    if (slide) speak(`Segment ${currentSegment + 1}. ${slide.title}.`);
+  }, [currentSegment, voiceEnabled, ttsSupported, phase]);
+
+  /* ── TTS: speak new key points as they appear ── */
+  useEffect(() => {
+    if (!voiceEnabled || !ttsSupported || phase !== "offline") return;
+    if (visiblePoints === 0) return;
+    const pointIdx = visiblePoints - 1;
+    if (pointIdx === lastSpokenPointRef.current) return;
+    lastSpokenPointRef.current = pointIdx;
+    const slide = slides[currentSegment];
+    const pt = slide?.keyPoints[pointIdx];
+    if (pt) speak(pt);
+  }, [visiblePoints, voiceEnabled, ttsSupported, phase]);
+
+  /* Stop TTS on unmount */
+  useEffect(() => () => stopTTS(), []);
+
   const currentSlide = slides[currentSegment];
 
   const overallProgress = showExamButton
@@ -457,6 +489,25 @@ export function SentinelPlayer({ courseId, onEnded }: SentinelPlayerProps) {
             Sentinel Sketch Engine
           </span>
         </div>
+        {/* Voice toggle */}
+        {ttsSupported && (
+          <button
+            onClick={() => {
+              if (voiceEnabled) { stopTTS(); setVoiceEnabled(false); }
+              else setVoiceEnabled(true);
+            }}
+            title={voiceEnabled ? "Mute Nigerian TTS voice" : "Enable Nigerian TTS voice"}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all"
+            style={{
+              background: voiceEnabled ? "rgba(0,112,255,0.12)" : "rgba(255,255,255,0.04)",
+              border: voiceEnabled ? "1px solid rgba(0,112,255,0.3)" : "1px solid rgba(255,255,255,0.1)",
+              color: voiceEnabled ? "#60A5FA" : "rgba(148,163,184,0.5)",
+            }}
+          >
+            {voiceEnabled ? <Volume2 size={11} /> : <VolumeX size={11} />}
+            {voiceEnabled ? "Voice ON" : "Voice OFF"}
+          </button>
+        )}
         <div className="flex items-center gap-3">
           {/* Phase badge */}
           <div

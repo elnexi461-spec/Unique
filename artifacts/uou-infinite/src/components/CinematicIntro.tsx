@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 
 interface CinematicIntroProps {
   onComplete: () => void;
 }
 
-/* Actual UOU Logo — transparent PNG, with circular glow halo */
 function UOULogo({ size = 160, glow = true }: { size?: number; glow?: boolean }) {
   return (
     <div
@@ -18,7 +17,6 @@ function UOULogo({ size = 160, glow = true }: { size?: number; glow?: boolean })
         justifyContent: "center",
       }}
     >
-      {/* Outer glow halo */}
       {glow && (
         <div
           style={{
@@ -50,42 +48,50 @@ function UOULogo({ size = 160, glow = true }: { size?: number; glow?: boolean })
 export function CinematicIntro({ onComplete }: CinematicIntroProps) {
   const [phase, setPhase] = useState<"ball" | "text" | "zoom" | "done">("ball");
 
-  /* Graceful, heavy physics — slow intentional bounces */
-  const ballY    = useSpring(0, { stiffness: 90,  damping: 14, mass: 1.4 });
-  const ballSquish = useSpring(1, { stiffness: 140, damping: 14, mass: 0.8 });
+  /* 1.5× faster physics — higher stiffness, lower mass */
+  const ballY     = useSpring(0, { stiffness: 135, damping: 14, mass: 0.93 });
+  const ballSquish = useSpring(1, { stiffness: 210, damping: 14, mass: 0.53 });
+
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
 
   useEffect(() => {
+    /* 1.5× speed: 480/1.5=320, 520/1.5=347, 180/1.5=120 */
+    const FALL   = 320;
+    const RISE   = 347;
+    const PAUSE  = 120;
     let bounceCount = 0;
-    const FALL_MS  = 480;
-    const RISE_MS  = 520;
-    const PAUSE_MS = 180;
+    const ts: ReturnType<typeof setTimeout>[] = [];
 
-    const bounce = () => {
-      if (bounceCount >= 3) {
-        setTimeout(() => setPhase("text"), 300);
-        return;
-      }
+    const doBounce = () => {
       ballY.set(160);
-      setTimeout(() => {
-        ballSquish.set(0.78);
+      ts.push(setTimeout(() => {
+        ballSquish.set(0.74);
         ballY.set(0);
-        setTimeout(() => {
+        ts.push(setTimeout(() => {
           ballSquish.set(1);
           bounceCount++;
-          setTimeout(bounce, PAUSE_MS);
-        }, RISE_MS);
-      }, FALL_MS);
+          if (bounceCount < 4) {
+            ts.push(setTimeout(doBounce, PAUSE));
+          } else {
+            /* 4th bounce complete — logo stops instantly, text fades in */
+            setPhase("text");
+          }
+        }, RISE));
+      }, FALL));
     };
 
-    const t1 = setTimeout(bounce, 600);
-    const t2 = setTimeout(() => setPhase("text"), 3000);
-    const t3 = setTimeout(() => setPhase("zoom"), 6200);
-    const t4 = setTimeout(() => { setPhase("done"); onComplete(); }, 9500);
+    /* Start drop at 400ms (1.5× faster than original 600ms) */
+    ts.push(setTimeout(doBounce, 400));
 
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+    /* 4 bounces complete at ~3550ms. Text phase for ~1900ms.
+       Zoom phase at 5450ms, done at 6900ms. */
+    ts.push(setTimeout(() => { if (phaseRef.current !== "done") setPhase("zoom"); }, 5450));
+    ts.push(setTimeout(() => { setPhase("done"); onComplete(); }, 6900));
+
+    return () => { ts.forEach(clearTimeout); };
   }, []);
 
-  /* Logo-matched deep navy background */
   const bg = "radial-gradient(ellipse 90% 75% at 50% 55%, #0D1F4E 0%, #060E26 50%, #020814 100%)";
 
   return (
@@ -95,24 +101,24 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
           key="intro"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden cursor-pointer"
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden cursor-pointer select-none"
           style={{ background: bg }}
           onClick={() => { setPhase("done"); onComplete(); }}
         >
-          {/* Subtle institutional grid */}
+          {/* Institutional grid */}
           <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="ci-grid" width="70" height="70" patternUnits="userSpaceOnUse">
-                  <path d="M 70 0 L 0 0 0 70" fill="none" stroke="#1D4ED8" strokeWidth="0.5" opacity="0.6"/>
+                  <path d="M 70 0 L 0 0 0 70" fill="none" stroke="#1D4ED8" strokeWidth="0.5" opacity="0.6" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#ci-grid)" />
             </svg>
           </div>
 
-          {/* Centre stage ambient glow */}
+          {/* Ambient glow */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.08, 0.18, 0.08] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -122,15 +128,15 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
 
           <AnimatePresence mode="wait">
 
-            {/* ── PHASE 1 — Graceful Bouncing Logo ── */}
+            {/* ── PHASE 1 — Bouncing Logo (4 bounces at 1.5× speed) ── */}
             {phase === "ball" && (
               <motion.div
                 key="ball"
                 initial={{ opacity: 0, scale: 0.1 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 3, filter: "blur(20px)" }}
-                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className="flex flex-col items-center select-none"
+                exit={{ opacity: 0, scale: 2.5, filter: "blur(16px)" }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="flex flex-col items-center"
                 style={{ y: ballY }}
               >
                 <motion.div style={{ scaleY: ballSquish, transformOrigin: "bottom" }}>
@@ -152,23 +158,23 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
               </motion.div>
             )}
 
-            {/* ── PHASE 2 — Text Reveal ── */}
+            {/* ── PHASE 2 — Text Reveal (logo stops, name fades in) ── */}
             {phase === "text" && (
               <motion.div
                 key="text"
-                initial={{ opacity: 0, scale: 0.6 }}
+                initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="text-center px-8 select-none"
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="text-center px-8"
               >
                 <motion.div
-                  initial={{ opacity: 0, y: -12 }}
+                  initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.7, delay: 0.1 }}
-                  className="flex justify-center mb-8"
+                  transition={{ duration: 0.45, delay: 0.05 }}
+                  className="flex justify-center mb-7"
                 >
-                  <UOULogo size={80} glow />
+                  <UOULogo size={88} glow />
                 </motion.div>
 
                 <motion.h1
@@ -183,9 +189,9 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
                   {"Unique ".split("").map((c, i) => (
                     <motion.span
                       key={`u${i}`}
-                      initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+                      initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      transition={{ delay: i * 0.08, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ delay: i * 0.045, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                       style={{ display: "inline-block" }}
                     >
                       {c === " " ? "\u00A0" : c}
@@ -194,9 +200,9 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
                   {"Open".split("").map((c, i) => (
                     <motion.span
                       key={`o${i}`}
-                      initial={{ opacity: 0, y: -40, filter: "blur(8px)" }}
+                      initial={{ opacity: 0, y: -30, filter: "blur(6px)" }}
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      transition={{ delay: 0.6 + i * 0.09, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ delay: 0.32 + i * 0.055, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
                       style={{
                         display: "inline-block",
                         color: "#60A5FA",
@@ -209,9 +215,9 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
                   {" University".split("").map((c, i) => (
                     <motion.span
                       key={`v${i}`}
-                      initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+                      initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      transition={{ delay: 1.0 + i * 0.07, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ delay: 0.58 + i * 0.042, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                       style={{ display: "inline-block" }}
                     >
                       {c === " " ? "\u00A0" : c}
@@ -220,10 +226,10 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
                 </motion.h1>
 
                 <motion.p
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.4, duration: 0.8, ease: "easeOut" }}
-                  className="text-base md:text-lg mt-5 font-light tracking-[0.25em] uppercase"
+                  transition={{ delay: 1.3, duration: 0.55, ease: "easeOut" }}
+                  className="text-base mt-5 font-light tracking-[0.25em] uppercase"
                   style={{ color: "rgba(147,197,253,0.75)" }}
                 >
                   ...knowledge for global impact
@@ -232,8 +238,8 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  transition={{ delay: 2.7, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                  className="mx-auto mt-6 h-[1px] max-w-xs"
+                  transition={{ delay: 1.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  className="mx-auto mt-5 h-[1px] max-w-xs"
                   style={{
                     background: "linear-gradient(90deg, transparent, #3B82F6, transparent)",
                     transformOrigin: "center",
@@ -242,20 +248,14 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
               </motion.div>
             )}
 
-            {/* ── PHASE 3 — Portal Zoom (logo zooms in and fills screen) ── */}
+            {/* ── PHASE 3 — Fast Zoom (1.5s, fills screen) ── */}
             {phase === "zoom" && (
               <motion.div
                 key="zoom"
                 initial={{ scale: 1, opacity: 1 }}
                 animate={{ scale: 30, opacity: 0 }}
-                transition={{ duration: 3.5, ease: [0.12, 0, 0.39, 0] }}
-                style={{
-                  width: 120,
-                  height: 120,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                transition={{ duration: 1.5, ease: [0.12, 0, 0.39, 0] }}
+                style={{ width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <UOULogo size={120} glow={false} />
               </motion.div>
@@ -267,7 +267,7 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
-            transition={{ delay: 1.5, duration: 1 }}
+            transition={{ delay: 1.0, duration: 0.8 }}
             className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs tracking-widest uppercase"
             style={{ color: "rgba(148,163,184,0.6)" }}
           >

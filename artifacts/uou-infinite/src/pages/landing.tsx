@@ -42,8 +42,8 @@ type LandingPhase = "intro" | "persona" | "landing";
 export default function LandingPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  // Always show intro on every page load/refresh
-  const [phase, setPhase] = useState<LandingPhase>("intro");
+  // Global splash in App.tsx handles the intro — start at persona selector
+  const [phase, setPhase] = useState<LandingPhase>("persona");
   const [hoveredCenter, setHoveredCenter] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });

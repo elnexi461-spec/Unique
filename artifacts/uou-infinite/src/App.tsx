@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,9 @@ import { AnnouncementTicker } from "@/components/AnnouncementTicker";
 import { SentinelPulse } from "@/components/SentinelPulse";
 import { SocialProofTicker } from "@/components/SocialProofTicker";
 import { NewsTicker } from "@/components/NewsTicker";
-import { useState } from "react";
+import { CinematicIntro } from "@/components/CinematicIntro";
+import { AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
@@ -108,24 +110,75 @@ function Router() {
   );
 }
 
-function App() {
+/* Track the current route in localStorage so the splash can restore it */
+function RouteTracker() {
+  const [location] = useLocation();
+  useEffect(() => {
+    if (
+      location &&
+      location !== "/" &&
+      !location.startsWith("/login") &&
+      !location.startsWith("/register")
+    ) {
+      localStorage.setItem("uou_last_path", location);
+    }
+  }, [location]);
+  return null;
+}
+
+/* Global splash gate — shows on every hard refresh, restores saved path */
+function GlobalSplash({ children }: { children: ReactNode }) {
+  const [splashDone, setSplashDone] = useState(false);
+  const [, setLocation] = useLocation();
+  const savedPathRef = useRef<string | null>(localStorage.getItem("uou_last_path"));
+
+  const handleComplete = useCallback(() => {
+    setSplashDone(true);
+    const p = savedPathRef.current;
+    if (p && p !== "/" && !p.startsWith("/login") && !p.startsWith("/register")) {
+      setTimeout(() => setLocation(p), 50);
+    }
+  }, [setLocation]);
+
+  return (
+    <>
+      {children}
+      <AnimatePresence>
+        {!splashDone && (
+          <CinematicIntro key="global-splash" onComplete={handleComplete} />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function AppShell() {
   const [sentinelActive, setSentinelActive] = useState(false);
 
+  return (
+    <GlobalSplash>
+      <AuthProvider>
+        <RouteTracker />
+        <AmbientParticles />
+        <AnnouncementTicker />
+        <Router />
+        <CommandMenu />
+        <SentinelChat onActiveChange={setSentinelActive} />
+        <SentinelPulse active={sentinelActive} label="UOU Sentinel Processing" />
+        <SocialProofTicker />
+        <NewsTicker />
+      </AuthProvider>
+    </GlobalSplash>
+  );
+}
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <ErrorBoundary>
-            <AuthProvider>
-              <AmbientParticles />
-              <AnnouncementTicker />
-              <Router />
-              <CommandMenu />
-              <SentinelChat onActiveChange={setSentinelActive} />
-              <SentinelPulse active={sentinelActive} label="UOU Sentinel Processing" />
-              <SocialProofTicker />
-              <NewsTicker />
-            </AuthProvider>
+            <AppShell />
           </ErrorBoundary>
         </WouterRouter>
         <Toaster />

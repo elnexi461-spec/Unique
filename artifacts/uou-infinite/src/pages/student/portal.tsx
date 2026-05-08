@@ -9,6 +9,7 @@ import { SkillGraph } from "@/components/SkillGraph";
 import { VanguardLeaderboard } from "@/components/VanguardLeaderboard";
 import { StudyStreak } from "@/components/StudyStreak";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
+import { KeySubmitPanel } from "@/components/KeySubmitPanel";
 
 export default function StudentPortal() {
   const { user } = useAuth();
@@ -128,6 +129,9 @@ export default function StudentPortal() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
         <VanguardLeaderboard />
       </motion.div>
+
+      {/* Performance Key Submit Panel */}
+      <KeySubmitPanel />
 
       {/* Current Enrollments */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
