@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { User } from "@workspace/api-client-react";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { getAuthToken, clearAuthToken, getGodModeUser, clearGodModeUser } from "./auth";
 import { useLocation } from "wouter";
 
@@ -22,6 +23,8 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+
   const token = getAuthToken();
   const [godUser, setGodUser] = useState<User | null>(() => {
     const g = getGodModeUser();
@@ -61,6 +64,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAuthToken();
     clearGodModeUser();
     setGodUser(null);
+    // Clear ALL cached query data immediately so stale apiUser doesn't
+    // cause a flash of the authenticated layout on the login page.
+    queryClient.clear();
     setLocation("/login");
   };
 
