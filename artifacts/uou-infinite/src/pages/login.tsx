@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useLogin } from "@workspace/api-client-react";
 import { setAuthToken, setGodModeUser } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Loader2, Lock, Mail, GraduationCap, Users, BookOpen } from "lucide-react";
+import { Shield, Loader2, Lock, Mail, GraduationCap, Users, BookOpen, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { UserActivityService } from "@/lib/UserActivityService";
 
@@ -133,6 +133,33 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ background: "hsl(222 72% 6%)" }}
     >
+      {/* ── Back to Home ── */}
+      <motion.div
+        initial={{ opacity: 0, x: -16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-5 left-5 z-50"
+      >
+        <Link href="/">
+          <motion.button
+            whileHover={{ x: -3 }}
+            whileTap={{ scale: 0.96 }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-colors group"
+            style={{
+              background: "rgba(4,11,26,0.75)",
+              borderColor: "rgba(59,130,246,0.25)",
+              color: "rgba(147,197,253,0.85)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <ArrowLeft
+              size={15}
+              className="transition-transform group-hover:-translate-x-0.5"
+            />
+            Back to Home
+          </motion.button>
+        </Link>
+      </motion.div>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
