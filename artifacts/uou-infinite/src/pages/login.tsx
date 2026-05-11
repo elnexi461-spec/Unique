@@ -133,30 +133,28 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ background: "hsl(222 72% 6%)" }}
     >
-      {/* ── Back to Home ── */}
+      {/* ── Back to Homepage — fixed top-left ── */}
       <motion.div
-        initial={{ opacity: 0, x: -16 }}
+        initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.55, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-5 left-5 z-50"
       >
         <Link href="/">
           <motion.button
-            whileHover={{ x: -3 }}
+            whileHover={{ x: -4, scale: 1.03 }}
             whileTap={{ scale: 0.96 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-colors group"
+            className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl border text-sm font-bold group"
             style={{
-              background: "rgba(4,11,26,0.75)",
-              borderColor: "rgba(59,130,246,0.25)",
-              color: "rgba(147,197,253,0.85)",
-              backdropFilter: "blur(12px)",
+              background: "rgba(4,11,26,0.88)",
+              borderColor: "rgba(59,130,246,0.4)",
+              color: "rgba(147,197,253,1)",
+              backdropFilter: "blur(16px)",
+              boxShadow: "0 0 18px rgba(59,130,246,0.15), 0 2px 8px rgba(0,0,0,0.4)",
             }}
           >
-            <ArrowLeft
-              size={15}
-              className="transition-transform group-hover:-translate-x-0.5"
-            />
-            Back to Home
+            <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-1" />
+            Back to Homepage
           </motion.button>
         </Link>
       </motion.div>
@@ -206,6 +204,35 @@ export default function LoginPage() {
           />
 
           <div className="p-8">
+
+            {/* ── Back to Homepage — top of card ── */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-6"
+            >
+              <Link href="/">
+                <motion.div
+                  whileHover={{ x: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2 w-fit group"
+                  style={{ cursor: "pointer" }}
+                >
+                  <div
+                    className="flex items-center gap-2.5 px-4 py-2 rounded-xl border text-sm font-semibold w-full"
+                    style={{
+                      background: "rgba(29,78,216,0.1)",
+                      borderColor: "rgba(59,130,246,0.3)",
+                      color: "rgba(147,197,253,0.95)",
+                    }}
+                  >
+                    <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+                    ← Back to Homepage
+                  </div>
+                </motion.div>
+              </Link>
+            </motion.div>
 
             {/* Role Quick Access */}
             <div className="mb-6">
