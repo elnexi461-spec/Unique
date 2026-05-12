@@ -16,6 +16,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [location]);
 
@@ -198,33 +199,36 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
+          {/* Logout button — opens confirmation modal, never logs out immediately */}
           <motion.button
-            onClick={logout}
+            onClick={() => setShowLogoutModal(true)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className="w-full group relative overflow-hidden rounded-lg flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-200"
+            className="w-full rounded-lg flex items-center justify-center gap-2.5 font-semibold transition-all duration-200"
             style={{
-              height: 36,
+              height: 44,
+              fontSize: "0.8125rem",
+              padding: "0 18px",
               background: "transparent",
-              border: "1px solid rgba(239,68,68,0.35)",
-              color: "rgba(239,68,68,0.75)",
+              border: "1px solid rgba(239,68,68,0.38)",
+              color: "rgba(239,68,68,0.78)",
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLButtonElement;
-              el.style.background = "rgba(239,68,68,0.08)";
-              el.style.borderColor = "rgba(239,68,68,0.6)";
+              el.style.background = "rgba(239,68,68,0.09)";
+              el.style.borderColor = "rgba(239,68,68,0.65)";
               el.style.color = "#EF4444";
-              el.style.boxShadow = "0 0 14px rgba(239,68,68,0.18), inset 0 0 12px rgba(239,68,68,0.05)";
+              el.style.boxShadow = "0 0 16px rgba(239,68,68,0.2), inset 0 0 14px rgba(239,68,68,0.06)";
             }}
             onMouseLeave={e => {
               const el = e.currentTarget as HTMLButtonElement;
               el.style.background = "transparent";
-              el.style.borderColor = "rgba(239,68,68,0.35)";
-              el.style.color = "rgba(239,68,68,0.75)";
+              el.style.borderColor = "rgba(239,68,68,0.38)";
+              el.style.color = "rgba(239,68,68,0.78)";
               el.style.boxShadow = "none";
             }}
           >
-            <LogOut size={13} />
+            <LogOut size={15} />
             End Session
           </motion.button>
         </div>
@@ -238,6 +242,121 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
+
+      {/* ── Logout Confirmation Modal ── */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="logout-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="fixed inset-0 z-[60]"
+              style={{ background: "rgba(2,6,18,0.75)", backdropFilter: "blur(10px)" }}
+              onClick={() => setShowLogoutModal(false)}
+            />
+
+            {/* Modal card */}
+            <motion.div
+              key="logout-modal"
+              initial={{ opacity: 0, scale: 0.92, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 16 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed z-[70] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] rounded-2xl flex flex-col overflow-hidden"
+              style={{
+                background: "hsl(222 78% 5%)",
+                border: "1px solid rgba(245,158,11,0.28)",
+                boxShadow: "0 0 60px rgba(0,0,0,0.7), 0 0 28px rgba(245,158,11,0.08)",
+              }}
+            >
+              {/* Gold top accent bar */}
+              <div className="h-[3px] w-full" style={{ background: "linear-gradient(90deg, transparent, #F59E0B 40%, #D97706 60%, transparent)" }} />
+
+              {/* Content */}
+              <div className="p-7 flex flex-col items-center text-center gap-4">
+                {/* Icon */}
+                <div className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}>
+                  <LogOut size={24} style={{ color: "#EF4444" }} />
+                </div>
+
+                {/* Copy */}
+                <div>
+                  <h2 className="text-white font-black text-lg leading-snug mb-1">End Your Session?</h2>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(148,163,184,0.8)" }}>
+                    Are you sure you want to end your session? Your academic progress is saved and you can log back in at any time.
+                  </p>
+                </div>
+
+                {/* UOU branding line */}
+                <div className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: "rgba(245,158,11,0.55)" }}>
+                  Unique Open University · Institutional OS
+                </div>
+
+                {/* Action buttons */}
+                <div className="w-full flex flex-col gap-2.5 mt-1">
+                  {/* Confirm */}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => { setShowLogoutModal(false); logout(); }}
+                    className="w-full rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                    style={{
+                      height: 46,
+                      fontSize: "0.875rem",
+                      background: "rgba(239,68,68,0.14)",
+                      border: "1px solid rgba(239,68,68,0.5)",
+                      color: "#EF4444",
+                      boxShadow: "0 0 18px rgba(239,68,68,0.12)",
+                    }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLButtonElement;
+                      el.style.background = "rgba(239,68,68,0.22)";
+                      el.style.boxShadow = "0 0 24px rgba(239,68,68,0.25)";
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLButtonElement;
+                      el.style.background = "rgba(239,68,68,0.14)";
+                      el.style.boxShadow = "0 0 18px rgba(239,68,68,0.12)";
+                    }}
+                  >
+                    <LogOut size={15} /> Confirm Logout
+                  </motion.button>
+
+                  {/* Cancel */}
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowLogoutModal(false)}
+                    className="w-full rounded-xl font-semibold transition-all"
+                    style={{
+                      height: 44,
+                      fontSize: "0.8125rem",
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(148,163,184,0.8)",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+                      (e.currentTarget as HTMLButtonElement).style.color = "#E2E8F0";
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)";
+                      (e.currentTarget as HTMLButtonElement).style.color = "rgba(148,163,184,0.8)";
+                    }}
+                  >
+                    Cancel
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -333,7 +333,7 @@ export function SentinelChat({ onActiveChange }: SentinelChatProps) {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 left-6 z-50"
+            className="fixed bottom-5 right-5 z-50"
           >
             <Button
               onClick={() => setIsOpen(true)}
@@ -359,7 +359,7 @@ export function SentinelChat({ onActiveChange }: SentinelChatProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-6 left-6 w-[360px] h-[520px] rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
+            className="fixed bottom-5 right-5 w-[360px] h-[520px] rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
             style={{
               background: "rgba(6,14,44,0.97)",
               border: "1px solid rgba(59,130,246,0.3)",
