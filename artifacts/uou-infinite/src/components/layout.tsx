@@ -198,11 +198,35 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
-          <Button variant="outline" onClick={logout}
-            className="w-full justify-start text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-all"
-            style={{ borderColor: "rgba(0,112,255,0.15)", height: 34 }}>
-            <LogOut size={13} className="mr-2" /> End Session
-          </Button>
+          <motion.button
+            onClick={logout}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full group relative overflow-hidden rounded-lg flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-200"
+            style={{
+              height: 36,
+              background: "transparent",
+              border: "1px solid rgba(239,68,68,0.35)",
+              color: "rgba(239,68,68,0.75)",
+            }}
+            onMouseEnter={e => {
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = "rgba(239,68,68,0.08)";
+              el.style.borderColor = "rgba(239,68,68,0.6)";
+              el.style.color = "#EF4444";
+              el.style.boxShadow = "0 0 14px rgba(239,68,68,0.18), inset 0 0 12px rgba(239,68,68,0.05)";
+            }}
+            onMouseLeave={e => {
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = "transparent";
+              el.style.borderColor = "rgba(239,68,68,0.35)";
+              el.style.color = "rgba(239,68,68,0.75)";
+              el.style.boxShadow = "none";
+            }}
+          >
+            <LogOut size={13} />
+            End Session
+          </motion.button>
         </div>
       </aside>
 

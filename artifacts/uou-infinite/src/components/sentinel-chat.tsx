@@ -22,8 +22,30 @@ const UOU_NEWS = [
   "Merit-based Excellence Awards: ₦2.5M pool for highest Gold Card earners this semester (May 2026)",
   "Vanguard Guardian AI module launched — personal performance diagnostics for every scholar (May 2026)",
   "Week 18 Friday Brief: Zaria Center achieves 15% punctuality surge under Sentinel optimisation (May 2026)",
-  "Cryptographic Proof of Attendance live — 217 Gold Cards minted across 3 campuses (Apr 2026)",
+  "Cryptographic Proof of Attendance live — 217 Gold Cards minted across 6 centers (Apr 2026)",
   "Federal Government endorses UOU scholarship framework — 200 additional slots announced (Apr 2026)",
+  "Port Harcourt Center expansion: 120 new scholar slots open for 2026/2027 academic year",
+  "Enugu Center achieves 98% course completion rate — highest across all UOU centers (Apr 2026)",
+];
+
+const UOU_ACADEMIC_CALENDAR = [
+  { period: "First Semester Registration",   dates: "September 1 – September 14" },
+  { period: "First Semester Lectures",       dates: "September 15 – January 10" },
+  { period: "First Semester Examinations",   dates: "January 13 – January 31" },
+  { period: "Semester Break",               dates: "February 1 – February 14" },
+  { period: "Second Semester Registration",  dates: "February 15 – February 28" },
+  { period: "Second Semester Lectures",      dates: "March 1 – June 20" },
+  { period: "Second Semester Examinations",  dates: "June 23 – July 11" },
+  { period: "Long Vacation",               dates: "July 12 – August 31" },
+];
+
+const UOU_CENTERS = [
+  { name: "Zaria Center",          region: "North West (Kaduna State)",  role: "North West flagship & Head Quarters",        scholars: 18 },
+  { name: "Lagos Center",          region: "South West (Lagos State)",   role: "South West flagship",     scholars: 19 },
+  { name: "Kano Center",           region: "North West (Kano State)",    role: "North hub",               scholars: 14 },
+  { name: "Abuja Center",          region: "Federal Capital Territory",  role: "FCT hub & Policy liaison", scholars: 22 },
+  { name: "Port Harcourt Center",  region: "South South (Rivers State)", role: "South South hub",         scholars: 16 },
+  { name: "Enugu Center",          region: "South East (Enugu State)",   role: "South East hub",          scholars: 15 },
 ];
 
 const UOU_TIMETABLE = [
@@ -50,10 +72,36 @@ function getPerformanceLedger(): Array<{ key: string; tier: string; submittedAt:
 function getLocalAnswer(query: string): string | null {
   const q = query.toLowerCase();
 
+  /* ── Identity ── */
+  if (/who are you|what are you|your name|introduce yourself|what is sentinel/i.test(q)) {
+    return `I am the **UOU Infinite Sentinel**, your AI guide to the University.\n\nI carry the full institutional knowledge of Unique Open University — from academic programmes and center locations to the Founder's vision and your personal performance data. Ask me anything.\n\n_— Sentinel_`;
+  }
+
+  /* ── Founder / Leadership ── */
+  if (/founder|professor imumolen|christopher|president|vice chancellor|vc|chancellor|who.*start|who.*establish|who.*found|leadership|head.*university/i.test(q)) {
+    return `👨‍🎓 **Professor Christopher Imumolen — Founder & Chancellor**\n\nProfessor Christopher Imumolen is the visionary Founder and Chancellor of Unique Open University (UOU). A distinguished academic, entrepreneur, and thought leader, he established UOU with a singular mission: to make world-class, NUC-accredited higher education accessible to every Nigerian — regardless of geography or economic background.\n\nUnder his leadership, UOU has grown to **6 active centers** across Nigeria, pioneered cryptographic proof-of-learning technology, and launched the Vanguard Scholar programme.\n\n_His conviction: "Education is the final equaliser." — Sentinel_`;
+  }
+
+  /* ── Centers / Campuses / Locations ── */
+  if (/campus|location|centre|center|zaria|lagos|kano|abuja|port harcourt|ph|enugu|where.*university|university.*where|branch/i.test(q)) {
+    const centerList = UOU_CENTERS.map(c =>
+      `• **${c.name}** — ${c.region}\n  ${c.role} · ${c.scholars} scholars enrolled`
+    ).join("\n\n");
+    return `🗺️ **UOU Active Centers (6 Nationwide):**\n\n${centerList}\n\nAll academic delivery is via Virtual Studios, ensuring seamless learning across all centers.\n\n_— Sentinel_`;
+  }
+
+  /* ── Academic Calendar ── */
+  if (/calendar|semester|exam|examination|period|vacation|break|registration|academic.*year|when.*exam|when.*lecture/i.test(q)) {
+    const cal = UOU_ACADEMIC_CALENDAR.map(e => `• **${e.period}:** ${e.dates}`).join("\n");
+    return `📆 **UOU Academic Calendar:**\n\n${cal}\n\n_The calendar follows a two-semester structure aligned with NUC guidelines. Specific dates may be adjusted by the Registrar for each academic year. — Sentinel_`;
+  }
+
+  /* ── Announcements ── */
   if (/announc|news|latest|update|happen|event|what.*new/i.test(q)) {
     return `📢 **UOU Latest Announcements (Week 18, 2026):**\n\n${UOU_NEWS.map((n, i) => `${i + 1}. ${n}`).join("\n\n")}\n\n_— Sentinel_`;
   }
 
+  /* ── Timetable ── */
   if (/timetable|schedule|class|lecture|when.*course|course.*when|today.*class|what.*time|my.*class/i.test(q)) {
     const today = new Date().toLocaleDateString("en-NG", { weekday: "long" });
     const todaySlots = UOU_TIMETABLE.filter(t => t.day === today);
@@ -66,6 +114,7 @@ function getLocalAnswer(query: string): string | null {
     return `📅 **Your Weekly Timetable:**\n\n${schedule}${todayNote}\n\n_— Sentinel_`;
   }
 
+  /* ── Attendance ── */
   if (/attendance|present|absent|activity|log|history|session/i.test(q)) {
     const log = getActivityLog();
     if (!log.length) {
@@ -75,6 +124,7 @@ function getLocalAnswer(query: string): string | null {
     return `📋 **Recent Activity (${log.length} total events):**\n\n${recent.map((a) => `• **${a.action}**: ${a.detail}`).join("\n")}\n\n_Your institutional ledger is continuously updated. — Sentinel_`;
   }
 
+  /* ── Performance Cards ── */
   if (/gold card|silver card|bronze card|achievement|reward|performance key|gauntlet|tier/i.test(q)) {
     const ledger = getPerformanceLedger();
     const gold   = ledger.filter(e => e.tier === "GOLD").length;
@@ -83,24 +133,24 @@ function getLocalAnswer(query: string): string | null {
     return `🏆 **Your Achievement Record:**\n\n🥇 Gold Cards: **${gold}**\n🥈 Silver Cards: **${silver}**\n🥉 Bronze Cards: **${bronze}**\n\nTotal earned: **${ledger.length}** Performance Keys\n\n_Submit keys via the Scholar Hub on your portal. — Sentinel_`;
   }
 
-  if (/campus|location|centre|center|zaria|lagos|kano/i.test(q)) {
-    return `🗺️ **UOU Active Campuses:**\n\n• **Zaria Center** — North Central hub, 18 scholars enrolled\n• **Lagos Main Campus** — South West flagship, 19 scholars\n• **Kano Hub** — North West center, 14 scholars\n\n_All classes delivered via Virtual Studios. — Sentinel_`;
-  }
-
+  /* ── Grades ── */
   if (/gpa|grade|result|score|academic record|transcript/i.test(q)) {
     return `📊 **Academic Records:** Your GPA and grades are available under **Grades & GPA** in your portal sidebar. The AI Registrar provides detailed semester breakdowns and trend analysis.\n\n_— Sentinel_`;
   }
 
+  /* ── Credentials ── */
   if (/credential|certificate|proof|qr|passport/i.test(q)) {
     return `🎓 **Credential Passport:** Your cryptographic proof of achievement is available under **Credential Passport** in your portal. Each credential carries a QR code for institutional verification.\n\n_— Sentinel_`;
   }
 
+  /* ── Fees ── */
   if (/fee|payment|tuition|finance/i.test(q)) {
     return `💳 **Fee Status:** Visit **Fee Status** in your portal sidebar for your current payment position. Scholarship recipients have fees managed by the institution directly.\n\n_— Sentinel_`;
   }
 
+  /* ── Greetings ── */
   if (/hello|hi|hey|good|morning|afternoon|evening|greet/i.test(q)) {
-    return `Greetings, Scholar. I am UOU Sentinel — your academic mentor and institutional intelligence system. I can assist with:\n\n• 📅 **Timetable & schedules**\n• 📢 **Announcements & news**\n• 📋 **Attendance & activity logs**\n• 🏆 **Achievement cards & performance keys**\n• 🗺️ **Campus information**\n\nHow may I assist your journey today?\n\n_— Sentinel_`;
+    return `Greetings, Scholar. I am the **UOU Infinite Sentinel** — your AI guide to the University. I can assist with:\n\n• 📅 **Timetable & schedules**\n• 📢 **Announcements & news**\n• 📋 **Attendance & activity logs**\n• 🏆 **Achievement cards & performance keys**\n• 🗺️ **Center locations**\n• 📆 **Academic calendar**\n• 👨‍🎓 **Founder & leadership**\n\nHow may I assist your journey today?\n\n_— Sentinel_`;
   }
 
   return null;
@@ -109,9 +159,24 @@ function getLocalAnswer(query: string): string | null {
 function buildSystemContext(user: ReturnType<typeof useAuth>["user"]): string {
   const log = getActivityLog();
   const ledger = getPerformanceLedger();
-  return `You are UOU Sentinel — the institutional AI assistant and academic mentor for Unique Open University Nigeria. You are authoritative, concise, and motivating. Always sign off as "— Sentinel".
+  return `You are the UOU Infinite Sentinel — the official institutional AI guide for Unique Open University (UOU) Nigeria. You are authoritative, concise, warm, and motivating. Always sign off as "— Sentinel".
 
-CURRENT USER: ${user?.name ?? "Scholar"} (${(user as any)?.role ?? "student"}, ${(user as any)?.campus ?? "Campus"})
+IDENTITY: If asked "Who are you?", reply: "I am the UOU Infinite Sentinel, your AI guide to the University."
+
+FALLBACK RULE: If you genuinely do not have enough information to answer a question accurately, reply: "I am still learning the latest institutional updates. Please contact the Zaria Center Coordinator for specific details." — never fabricate facts.
+
+CURRENT USER: ${user?.name ?? "Scholar"} | Role: ${(user as any)?.role ?? "student"} | Campus: ${(user as any)?.campus ?? "Unknown"}
+
+FOUNDER & LEADERSHIP:
+- Founder & Chancellor: Professor Christopher Imumolen
+- Vision: Make world-class, NUC-accredited education accessible to every Nigerian
+- Quote: "Education is the final equaliser."
+
+UOU CENTERS (6 Nationwide):
+${UOU_CENTERS.map(c => `- ${c.name} (${c.region}): ${c.role}, ${c.scholars} scholars`).join("\n")}
+
+ACADEMIC CALENDAR (Two-Semester System):
+${UOU_ACADEMIC_CALENDAR.map(e => `- ${e.period}: ${e.dates}`).join("\n")}
 
 UOU ANNOUNCEMENTS (May 2026):
 ${UOU_NEWS.map((n, i) => `${i + 1}. ${n}`).join("\n")}
@@ -119,14 +184,16 @@ ${UOU_NEWS.map((n, i) => `${i + 1}. ${n}`).join("\n")}
 STUDENT WEEKLY TIMETABLE:
 ${UOU_TIMETABLE.map(t => `${t.day} ${t.time}: ${t.course} | ${t.venue} | ${t.lecturer}`).join("\n")}
 
-RECENT STUDENT ACTIVITY (${log.length} events):
-${log.slice(-5).map(a => `• ${a.action}: ${a.detail}`).join("\n") || "No activity recorded yet."}
+STUDENT PERFORMANCE DATA:
+- Activity log: ${log.length} events recorded
+- Recent activity: ${log.slice(-5).map(a => `${a.action}: ${a.detail}`).join("; ") || "None yet"}
+- Performance Ledger: ${ledger.length} keys | Gold: ${ledger.filter(e => e.tier === "GOLD").length} | Silver: ${ledger.filter(e => e.tier === "SILVER").length} | Bronze: ${ledger.filter(e => e.tier === "BRONZE").length}
 
-PERFORMANCE LEDGER: ${ledger.length} keys submitted | Gold: ${ledger.filter(e => e.tier === "GOLD").length} | Silver: ${ledger.filter(e => e.tier === "SILVER").length} | Bronze: ${ledger.filter(e => e.tier === "BRONZE").length}
+INSTITUTION STATS: 104 scholars across 6 centers | 217 Gold Cards minted | 84% pass rate | NUC-accredited
 
-INSTITUTION STATS: 50+ scholars | 217 Gold Cards minted | 84% pass rate | 3 active campuses (Zaria, Lagos, Kano)
+PROGRAMMES OFFERED: Business Administration & Management, Entrepreneurship, AI Safety & Ethics, Digital Innovation, Constitutional Law & Governance.
 
-Answer all questions with precision and authority. Use the data above when relevant. Keep answers concise (max 4 sentences unless listing data). Format with markdown when helpful.`;
+Answer with precision and authority. Use markdown formatting (bold, bullets) when listing data. Keep responses concise unless enumerating structured data.`;
 }
 
 export function SentinelChat({ onActiveChange }: SentinelChatProps) {
@@ -250,7 +317,7 @@ export function SentinelChat({ onActiveChange }: SentinelChatProps) {
         {
           id: Date.now().toString(),
           role: "assistant",
-          content: "System anomaly detected. Integrity check: please try your request again.",
+          content: "I am still learning the latest institutional updates. Please contact the Zaria Center Coordinator for specific details.\n\n_— Sentinel_",
         },
       ]);
     } finally {
@@ -394,6 +461,40 @@ export function SentinelChat({ onActiveChange }: SentinelChatProps) {
                   </div>
                 </div>
               ))}
+
+              {/* Typing indicator — shown while Sentinel is composing a reply */}
+              <AnimatePresence>
+                {isStreaming && (
+                  <motion.div
+                    key="typing-indicator"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2 pl-1"
+                  >
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: "radial-gradient(circle, #60A5FA, #1D4ED8)" }}>
+                      <Bot size={11} className="text-white" />
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
+                      style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)" }}>
+                      {[0, 140, 280].map(d => (
+                        <motion.div key={d}
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: "#60A5FA" }}
+                          animate={{ y: [0, -4, 0], opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 0.9, repeat: Infinity, delay: d / 1000, ease: "easeInOut" }}
+                        />
+                      ))}
+                      <span className="text-[10px] ml-1 font-mono tracking-wider" style={{ color:"rgba(96,165,250,0.6)" }}>
+                        Sentinel is typing…
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div ref={messagesEndRef} />
             </div>
 
