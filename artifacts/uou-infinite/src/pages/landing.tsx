@@ -154,8 +154,10 @@ export default function LandingPage() {
   // Use window scroll (not element-relative) so hero parallax tracks
   // the actual scroll position reliably and reverses on scroll-up.
   const { scrollY } = useScroll();
-  const heroY       = useTransform(scrollY, [0, 640], [0, -90]);
-  const heroOpacity = useTransform(scrollY, [0, 520], [1, 0]);
+  // Start fading only after 50px of scroll so the hero is fully visible on load.
+  // Reverses automatically when scrolling back to the top.
+  const heroY       = useTransform(scrollY, [50, 680], [0, -90]);
+  const heroOpacity = useTransform(scrollY, [50, 560], [1, 0]);
 
   useEffect(() => {
     if (user) {
@@ -285,66 +287,79 @@ export default function LandingPage() {
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
               style={{ background:"radial-gradient(circle, rgba(29,78,216,0.35), transparent 70%)" }} />
 
-            <div className="text-center max-w-5xl relative z-10">
-              {/* Logo — pulses on loop, fades with section via heroOpacity on parent */}
+            {/* ── Hero text block
+                 ALL elements use `animate` (not whileInView) so they are
+                 GUARANTEED visible on page load. The parent motion.section
+                 already has style={{ opacity: heroOpacity }} which handles
+                 the scroll-linked fade: fades out after 50px of scroll,
+                 fades back in when scrolling back to the top. ── */}
+            <div className="text-center max-w-5xl relative z-20">
+
+              {/* Logo */}
               <motion.div
                 initial={{ opacity:0, scale:0.85 }}
-                whileInView={{ opacity:1, scale:1 }}
-                viewport={{ once:false, amount:0.3 }}
+                animate={{ opacity:1, scale:1 }}
                 transition={{ duration:0.7, ease:EC }}
-                className="w-24 h-24 mx-auto mb-8">
-                <motion.img src={import.meta.env.BASE_URL+"uou-logo.png"} alt="UOU" className="w-full h-full object-contain"
+                className="w-24 h-24 mx-auto mb-8"
+              >
+                <motion.img
+                  src={import.meta.env.BASE_URL+"uou-logo.png"} alt="UOU"
+                  className="w-full h-full object-contain"
                   animate={{ filter:["drop-shadow(0 0 12px rgba(59,130,246,0.4))","drop-shadow(0 0 28px rgba(59,130,246,0.7))","drop-shadow(0 0 12px rgba(59,130,246,0.4))"] }}
-                  transition={{ duration:3, repeat:Infinity }} />
+                  transition={{ duration:3, repeat:Infinity }}
+                />
               </motion.div>
 
-              {/* Badge */}
+              {/* Accreditation badge */}
               <motion.div
                 initial={{ opacity:0, y:20 }}
-                whileInView={{ opacity:1, y:0 }}
-                viewport={{ once:false, amount:0.4 }}
-                transition={{ delay:0.1, duration:0.6, ease:EC }}
+                animate={{ opacity:1, y:0 }}
+                transition={{ delay:0.15, duration:0.6, ease:EC }}
                 className="inline-flex items-center gap-2 text-sm font-medium px-4 py-1.5 rounded-full mb-6"
-                style={{ background:"rgba(29,78,216,0.25)", border:"1px solid rgba(59,130,246,0.3)", color:C.glow }}>
+                style={{ background:"rgba(29,78,216,0.25)", border:"1px solid rgba(59,130,246,0.3)", color:C.glow }}
+              >
                 NUC Accredited · Digital University · Nigeria
               </motion.div>
 
-              {/* Hero headline — each word scroll-linked: reappears when scrolling back up */}
-              <div className="overflow-hidden mb-5">
-                <motion.h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none">
+              {/* Headline — each word cascades in, z-20 to sit above background layers */}
+              <div className="mb-5 relative z-20">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none">
                   {["Unique","Open","University"].map((w, wi) => (
                     <motion.span key={w}
                       initial={{ opacity:0, y:80 }}
-                      whileInView={{ opacity:1, y:0 }}
-                      viewport={{ once:false, amount:0.3 }}
-                      transition={{ delay:0.15+wi*0.18, duration:0.85, ease:EC }}
-                      style={{ display:"inline-block", marginRight:wi<2?"0.3em":0,
+                      animate={{ opacity:1, y:0 }}
+                      transition={{ delay:0.32+wi*0.18, duration:0.85, ease:EC }}
+                      style={{
+                        display:"inline-block",
+                        marginRight:wi<2?"0.3em":0,
                         color:w==="Open"?C.electric:"white",
-                        textShadow:w==="Open"?"0 0 60px rgba(59,130,246,0.5)":undefined }}>
+                        textShadow:w==="Open"?"0 0 60px rgba(59,130,246,0.5)":undefined,
+                      }}
+                    >
                       {w}
                     </motion.span>
                   ))}
-                </motion.h1>
+                </h1>
               </div>
 
               {/* Subtitle */}
               <motion.p
                 initial={{ opacity:0, y:24 }}
-                whileInView={{ opacity:1, y:0 }}
-                viewport={{ once:false, amount:0.4 }}
-                transition={{ delay:0.38, duration:0.7, ease:EC }}
-                className="text-xl md:text-2xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
+                animate={{ opacity:1, y:0 }}
+                transition={{ delay:0.72, duration:0.7, ease:EC }}
+                className="text-xl md:text-2xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed"
+              >
                 Making world-class education accessible to everyone.
                 NUC-accredited degrees, flexible learning, and strong career support.
               </motion.p>
 
-              {/* CTA buttons */}
+              {/* CTA row */}
               <motion.div
                 initial={{ opacity:0, y:24 }}
-                whileInView={{ opacity:1, y:0 }}
-                viewport={{ once:false, amount:0.4 }}
-                transition={{ delay:0.52, duration:0.6, ease:EC }}
-                className="flex items-center justify-center gap-4 flex-wrap mb-14">
+                animate={{ opacity:1, y:0 }}
+                transition={{ delay:0.88, duration:0.6, ease:EC }}
+                className="flex items-center justify-center gap-4 flex-wrap mb-14"
+              >
                 <Link href="/login">
                   <motion.div whileHover={{scale:1.04,y:-2}} whileTap={{scale:0.97}}>
                     <Button size="lg" className="h-14 px-8 text-base font-black text-white border-0"
@@ -355,15 +370,18 @@ export default function LandingPage() {
                 </Link>
                 <Link href="/login">
                   <motion.div whileHover={{scale:1.04,y:-2}} whileTap={{scale:0.97}}>
-                    <Button variant="outline" size="lg" className="h-14 px-8 text-base font-semibold transition-all hover:bg-blue-500/10 hover:border-blue-400/60"
+                    <Button variant="outline" size="lg"
+                      className="h-14 px-8 text-base font-semibold transition-all hover:bg-blue-500/10 hover:border-blue-400/60"
                       style={{ borderColor:"rgba(59,130,246,0.4)", color:C.electric }}>
                       <Zap size={16} className="mr-2"/> Enter Digital Campus
                     </Button>
                   </motion.div>
                 </Link>
-                <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}}
+                <motion.button
+                  whileHover={{scale:1.02}} whileTap={{scale:0.98}}
                   onClick={() => setPhase("persona")}
-                  className="h-14 px-6 text-sm font-medium text-white/50 hover:text-white/80 transition-colors">
+                  className="h-14 px-6 text-sm font-medium text-white/50 hover:text-white/80 transition-colors"
+                >
                   Demo Mode →
                 </motion.button>
               </motion.div>
@@ -373,10 +391,10 @@ export default function LandingPage() {
                 {STATS_HERO.map((s, i) => (
                   <motion.div key={s.label}
                     initial={{ opacity:0, y:24 }}
-                    whileInView={{ opacity:1, y:0 }}
-                    viewport={{ once:false, amount:0.4 }}
-                    transition={{ delay:0.1+i*0.1, duration:0.6, ease:EC }}
-                    className="text-center">
+                    animate={{ opacity:1, y:0 }}
+                    transition={{ delay:1.02+i*0.1, duration:0.6, ease:EC }}
+                    className="text-center"
+                  >
                     <div className="text-3xl font-black" style={{ color:C.electric }}>{s.value}</div>
                     <div className="text-xs text-white/50 uppercase tracking-wider mt-0.5">{s.label}</div>
                   </motion.div>
